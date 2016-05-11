@@ -1,15 +1,26 @@
-package com.ortosoft.ortodoxworship;
+package com.ortosoft.ortodoxworship.Model;
 
-import com.ortosoft.ortodoxworship.Model.Group;
-
-import org.junit.Assert;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.*;
 
 /**
  * Created by admin on 11.05.2016.
  */
-public class GroupsTest {
+public class GroupTest {
+
+    @Before
+    public void setUp() throws Exception {
+
+    }
+
+    @After
+    public void tearDown() throws Exception {
+
+    }
 
     @Test
     public void create_new_group() throws Exception {
