@@ -2,6 +2,7 @@ package com.ortosoft.ortodoxworship.Model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ortosoft.ortodoxworship.common.WorshipConst;
@@ -46,15 +47,26 @@ public class Group {
     public long SaveOrUpdate() throws WorshipErrors
     {
         if (_name == null) {
-            throw WorshipErrors.Item(1000);
+            throw WorshipErrors.Item(1000, null);
         }
 
         SQLiteDatabase db = SQLiteWorship.Item().get_db();
         ContentValues cv = new ContentValues();
         cv.put(TableGroup.COLUMN_NAME, _name);
 
-        return _id == WorshipConst.EMPTY_ID ? db.insert(TableGroup.NAME, null, cv) : db.update(TableGroup.NAME, cv,
-                TableGroup.COLUMN_ID + " = ?", new String[] {String.valueOf(_id)});
+        try {
+            if (_id == WorshipConst.EMPTY_ID)
+                _id = db.insertOrThrow(TableGroup.NAME, null, cv);
+            else
+                TableGroup.Update(_id, _name, db);
+        } catch (SQLException e) {
+            if (TableGroup.CheckUnique(e.getMessage()))
+                throw WorshipErrors.Item(1001, null);
+            else
+                throw e;
+        }
+
+        return _id;
     }
 
     // Удаляется выбранная группа
@@ -84,14 +96,24 @@ public class Group {
 
     // Описание таблицы GROUPS
     private static class TableGroup {
-        public static final String NAME = "group";
+        public static final String NAME = "groups";
 
         // Названия столбцов
         private static final String COLUMN_ID = "_id";
         private static final String COLUMN_NAME = "name";
 
         // Номера столбцов
-        private static final int COLUMN_ID_NUM = 1;
-        private static final int COLUMN_NAME_NUM = 2;
+        private static final int COLUMN_ID_NUM = 0;
+        private static final int COLUMN_NAME_NUM = 1;
+
+        private static final void Update(long id, String name, SQLiteDatabase db){
+            String sql = String.format("update %1$s set %2$s = '%3$s' where %4$s = %5$s", NAME, COLUMN_NAME, name, COLUMN_ID, id);
+            db.execSQL(sql);
+        }
+
+        private static boolean CheckUnique(String msg)
+        {
+            return msg.startsWith("UNIQUE constraint");
+        }
     }
 }
