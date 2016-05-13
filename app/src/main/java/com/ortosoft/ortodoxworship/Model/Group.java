@@ -9,36 +9,32 @@ import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
+import java.util.ArrayList;
+
 /**
  * Created by admin on 11.05.2016.
  * Класс реализует функционла работы с группами людей, содержит код доступа к базе данных
  */
 public class Group {
-    private long _id = WorshipConst.EMPTY_ID;
-    private String _name;
 
-    // Создает группу с заданным именем
-    public Group(String name) {
-        _name = name;
-    }
-
-    // Используется для создания экземпляра из базы данных
     private Group(long id, String name)
     {
         _id = id;
         _name = name;
     }
+    public Group(String name) {
+        _name = name;
+    }
 
+    private long _id = WorshipConst.EMPTY_ID;
     public long get_id(){
         return _id;
     }
 
-    // Возвращает имя группы
+    private String _name;
     public String get_name() {
         return _name;
     }
-
-    // Устанавливается имя группы
     public void set_name(String name){
         _name = name;
     }
@@ -68,15 +64,38 @@ public class Group {
 
         return _id;
     }
-
     // Удаляется выбранная группа
-    public static void Delete(Group group){
+    public static void Delete(Group group) throws WorshipErrors
+    {
         SQLiteDatabase db = SQLiteWorship.Item().get_db();
-        db.delete(TableGroup.NAME, TableGroup.COLUMN_ID + " = ?", new String[] { String.valueOf(group.get_id())});
+        try {
+            TableGroup.Delete(group, db);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+    // Удвляется список групп
+    public static void Delete(Group[] groups) throws WorshipErrors
+    {
+        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+
+        db.beginTransaction();
+        try {
+            for (Group g : groups)
+                TableGroup.Delete(g, db);
+
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            throw e;
+        }
+        finally {
+            db.endTransaction();
+        }
     }
 
     // Находится группа по переданному имени
-    public static Group FindByName(String name) {
+    public static Group FindByName(String name)
+    {
         SQLiteDatabase db = SQLiteWorship.Item().get_db();
         Cursor mCursor = db.query(TableGroup.NAME, null, TableGroup.COLUMN_NAME + " = ?", new String[] { name }, null, null, null);
 
@@ -93,6 +112,27 @@ public class Group {
             mCursor.close();
         }
     }
+    // Получение всех групп
+    public static ArrayList<Group> FindAll()
+    {
+        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        Cursor mCursor = db.query(TableGroup.NAME, null, null, null, null, null, TableGroup.COLUMN_NAME);
+        ArrayList<Group> arrayList = new ArrayList<>();
+
+        try {
+            mCursor.moveToFirst();
+            if (!mCursor.isAfterLast()){
+                do{
+                long found_id = mCursor.getLong(TableGroup.COLUMN_ID_NUM);
+                String found_name  = mCursor.getString(TableGroup.COLUMN_NAME_NUM);
+                arrayList.add(new Group(found_id, found_name));
+                } while (mCursor.moveToNext());
+            }
+        } finally {
+            mCursor.close();
+        }
+        return arrayList;
+    }
 
     // Описание таблицы GROUPS
     private static class TableGroup {
@@ -106,8 +146,13 @@ public class Group {
         private static final int COLUMN_ID_NUM = 0;
         private static final int COLUMN_NAME_NUM = 1;
 
-        private static final void Update(long id, String name, SQLiteDatabase db){
+        private static void Update(long id, String name, SQLiteDatabase db){
             String sql = String.format("update %1$s set %2$s = '%3$s' where %4$s = %5$s", NAME, COLUMN_NAME, name, COLUMN_ID, id);
+            db.execSQL(sql);
+        }
+
+        private static void Delete(Group group, SQLiteDatabase db){
+            String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, group.get_id());
             db.execSQL(sql);
         }
 
