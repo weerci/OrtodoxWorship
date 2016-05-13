@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.ortosoft.ortodoxworship.App;
+
 import java.util.ArrayList;
 
 /**
@@ -17,9 +19,9 @@ public class MyDatabase extends SQLiteOpenHelper {
 
     public MyDatabase(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        //super(App.getContext(), DATABASE_NAME, null, DATABASE_VERSION);
 
-        mQueries.add("CREATE TABLE groups (_id INTEGER PRIMARY KEY ASC AUTOINCREMENT NOT NULL, name TEXT NOT NULL); ");
-        mQueries.add("CREATE UNIQUE INDEX idx_groups_name ON groups (name); ");
+        mQueries.add(Tables.Group.get_ddl());
     }
 
     @Override
