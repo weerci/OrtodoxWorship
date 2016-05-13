@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="script_ddl">
+        <item>CREATE TABLE groups (_id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name text NOT NULL, CONSTRAINT idx_groups_name UNIQUE (name));</item>
+    </string-array>
+
+</resources>

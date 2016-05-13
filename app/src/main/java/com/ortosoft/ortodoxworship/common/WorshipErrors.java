@@ -19,10 +19,22 @@ public class WorshipErrors extends Exception {
         _desc = WorshipErrors.get(id);
     }
 
+    // Создает экземпляр исключения
     public static WorshipErrors Item(long id)
     {
         return new WorshipErrors(id);
     }
+
+    // Возвращает номер исключения из WorshiErrors
+    public long get_id(){
+        return _id;
+    }
+
+    // Возвращает описание ошибки
+    public String get_desc(){
+        return _desc;
+    }
+
 
     // Список ошибок возможных в программе
     public static final HashMap<Long, String> WorshipErrors;

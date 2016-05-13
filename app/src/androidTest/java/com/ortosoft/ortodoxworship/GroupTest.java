@@ -22,13 +22,30 @@ public class GroupTest extends ApplicationTestCase<Application> {
         assertEquals(group.get_name(), "111");
     }
 
-    /*    @Test
-    public void find_group_by_name()throws Exception {
+    @SmallTest
+    public void test_save_update_delete_find_group() throws Exception {
+
+        // Тестируем сохранение
         String name = "222";
         Group group = new Group(name);
+        group.SaveOrUpdate();
         Group found_group = Group.FindByName(name);
+        assertEquals(name, found_group.get_name());
 
-        assertEquals(found_group.get_name(), name);
+        // Тестируем изменение
+        String name_1 = "333";
+        group.set_name(name_1);
+        group.SaveOrUpdate();
+        found_group = Group.FindByName(name);
+        Group found_group_new = Group.FindByName(name_1);
 
-    }*/
+        assertNull(found_group);
+        assertNotNull(found_group_new);
+
+        // Тестируем удаление
+        Group.Delete(found_group_new);
+        found_group_new = Group.FindByName(name_1);
+        assertNull(found_group_new);
+    }
+
 }
