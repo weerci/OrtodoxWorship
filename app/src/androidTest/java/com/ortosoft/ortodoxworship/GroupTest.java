@@ -120,7 +120,6 @@ public class GroupTest extends ApplicationTestCase<Application> {
             list_found = Group.FindAll();
             assertEquals(0, list_found.size());
 
-            db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
         }
