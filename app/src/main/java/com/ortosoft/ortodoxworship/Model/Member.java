@@ -1,6 +1,7 @@
 package com.ortosoft.ortodoxworship.Model;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -15,7 +16,7 @@ import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 public class Member
 {
     private long _id = WorshipConst.EMPTY_ID;
-    private long get_id() { return _id; }
+    public long get_id() { return _id; }
 
     private String _name;
     public String get_name() {
@@ -50,15 +51,18 @@ public class Member
     }
 
     // region Constructors
-    public Member(String name, String description, State.IsBaptized isBaptized, State.IsDead isDead) {
-        _name = name;
-        _comment = description;
+    private Member(long id, String name, String comment, State.IsBaptized isBaptized, State.IsDead isDead){
+        this(name, comment, isBaptized, isDead);
+        _id = id;
+    }
+    public Member(String name, String comment, State.IsBaptized isBaptized, State.IsDead isDead) {
+        this(name, comment);
         _isBaptized = isBaptized;
         _isIsDead = isDead;
     }
-    public Member(String name, String description) {
+    public Member(String name, String comment) {
         _name = name;
-        _comment = description;
+        _comment = comment;
     }
     // endregion
 
@@ -70,6 +74,29 @@ public class Member
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    public static Member FindById(long id)
+    {
+        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        Cursor mCursor = db.query(TableMember.NAME, null, TableMember.COLUMN_ID + " = ?", new String[] { String.valueOf(id) }, null, null, null);
+
+        try {
+            mCursor.moveToFirst();
+            if (!mCursor.isAfterLast()){
+                long found_id = mCursor.getLong(TableMember.COLUMN_ID_NUM);
+                String found_name  = mCursor.getString(TableMember.COLUMN_NAME_NUM);
+                String found_comment  = mCursor.getString(TableMember.COLUMN_COMMENT_NUM);
+                State.IsBaptized found_baptized  = State.IntToBaptized(mCursor.getInt(TableMember.COLUMN_BAPTIZED_NUM));
+                State.IsDead found_dead  = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
+                return new Member(found_id, found_name, found_comment, found_baptized, found_dead);
+            } else {
+                return null;
+            }
+        } finally {
+            mCursor.close();
+        }
+
     }
 
     public long SaveOrUpdate() throws WorshipErrors

@@ -52,13 +52,14 @@ public class MemberTest extends ApplicationTestCase<Application> {
         assertEquals(State.IsBaptized.yes, member.get_isBaptized());
         assertEquals(State.IsDead.yes, member.get_isIsDead());
 
+        Member member_found = Member.FindById(member.get_id());
+        assertNull(member_found);
     }
 
     @SmallTest
-    public void test_update_member() throws Exception {
+    public void test_update_find_member() throws Exception {
         member.SaveOrUpdate();
-        assertEquals(name, member.get_name());
-        assertEquals(comment, member.get_comment());
+        Member found_member = Member.FindById(member.get_id());
+        assertNotNull(found_member);
     }
-
 }
