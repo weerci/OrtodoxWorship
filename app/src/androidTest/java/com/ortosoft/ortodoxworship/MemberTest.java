@@ -113,27 +113,68 @@ public class MemberTest extends ApplicationTestCase<Application> {
     }
 
     @SmallTest
-    public void test_add_member_to_group() throws Exception
+    public void test_add_remove_member_to_group() throws Exception
     {
         SQLiteDatabase db = SQLiteWorship.Item().get_db();
         db.beginTransaction();
 
         try {
             Group group = new Group("123");
+            Group group1 = new Group("321");
             group.SaveOrUpdate();
+            group1.SaveOrUpdate();
 
             Member member = new Member("111", "222", State.IsBaptized.yes, State.IsDead.no);
             member.AddToGroup(group);
+            member.AddToGroup(group1);
             member.SaveOrUpdate();
 
             Member find_member = Member.FindById(member.get_id());
             ArrayList<Group> list_groups = find_member.get_listOfGroup();
 
+            assertEquals(2, list_groups.size());
+            assertEquals(list_groups.get(0).get_name(), group.get_name());
+            assertEquals(list_groups.get(1).get_name(), group1.get_name());
+
+            member.RemoveFromGroup(group1);
+            member.SaveOrUpdate();
+            find_member = Member.FindById(member.get_id());
+            list_groups = find_member.get_listOfGroup();
             assertEquals(1, list_groups.size());
             assertEquals(list_groups.get(0).get_name(), group.get_name());
+
         } finally {
             db.endTransaction();
         }
+    }
+
+    @SmallTest
+    public void test_add_remove_member_to_worship() throws Exception
+    {
+       /* SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        db.beginTransaction();
+
+        try {
+            Worship worshipMorning = new WorshipMorning();
+            Worship worship1Evening = new WorshipEvening();
+
+            Member member = new Member("123", "123", State.IsBaptized.yes, State.IsDead.no);
+            member.AddToWorship(worshipMorning);
+            member.AddToWorship(worship1Evening);
+
+            member.SaveOrUpdate();
+            Member member_found = Member.FindById(member.get_id());
+
+            ArrayList<Worship> list_of_worships = member_found.get_listOfWorship();
+            assertEquals(2, list_of_worships.size());
+
+            member_found.RemoveFromWorship(worshipMorning);
+            member_found.SaveOrUpdate();
+            assertEquals(1, list_of_worships.size());
+        } finally {
+            db.endTransaction();
+        }*/
+
     }
 }
 

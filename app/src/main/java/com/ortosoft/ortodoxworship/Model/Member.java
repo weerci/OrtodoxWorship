@@ -73,7 +73,7 @@ public class Member
 
     private void load_groups()
     {
-
+        _listOfGroup = TableMembersGroups.LoadGroupOfMember(_id, SQLiteWorship.Item().get_db());
     }
 
     // Удаление человека
@@ -120,7 +120,9 @@ public class Member
                 String found_comment  = mCursor.getString(TableMember.COLUMN_COMMENT_NUM);
                 State.IsBaptized found_baptized  = State.IntToBaptized(mCursor.getInt(TableMember.COLUMN_BAPTIZED_NUM));
                 State.IsDead found_dead  = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
-                return new Member(found_id, found_name, found_comment, found_baptized, found_dead);
+                Member member = new Member(found_id, found_name, found_comment, found_baptized, found_dead);
+                member.load_groups();
+                return member;
             } else {
                 return null;
             }
@@ -145,7 +147,9 @@ public class Member
                     String found_comment  = mCursor.getString(TableMember.COLUMN_COMMENT_NUM);
                     State.IsBaptized found_baptized  = State.IntToBaptized(mCursor.getInt(TableMember.COLUMN_BAPTIZED_NUM));
                     State.IsDead found_dead  = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
-                    arrayList.add(new Member(found_id, found_name, found_comment, found_baptized, found_dead));
+                    Member member = new Member(found_id, found_name, found_comment, found_baptized, found_dead);
+                    member.load_groups();
+                    arrayList.add(member);
                 } while (mCursor.moveToNext());
             }
         } finally {
@@ -202,6 +206,11 @@ public class Member
         _listOfGroup.add(group);
     }
 
+    // Удаляем человека из группы
+    public void RemoveFromGroup(Group group)
+    {
+        _listOfGroup.remove(group);
+    }
 
     private static class TableMember {
         public static final String NAME = "members";
@@ -221,7 +230,7 @@ public class Member
         private static final int COLUMN_BAPTIZED_NUM = 4;
 
         private static void Update(long id, String name, String comment, int isBaptized, int isDead, SQLiteDatabase db){
-            String sql = String.format("update %1$s set %2$s = '%3$s', %6$s = '%7$s', %8$s = %9$s, %10$s = %11$s, %12$s = %13$s where %4$s = %5$s",
+            String sql = String.format("update %1$s set %2$s = '%3$s', %6$s = '%7$s', %8$s = %9$s, %10$s = %11$s where %4$s = %5$s",
                     NAME, COLUMN_NAME, name, COLUMN_ID, id, COLUMN_COMMENT, comment, COLUMN_BAPTIZED, isBaptized, COLUMN_IS_DEAD, isDead);
             db.execSQL(sql);
         }
