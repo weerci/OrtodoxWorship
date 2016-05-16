@@ -4,6 +4,7 @@
         <item>CREATE TABLE groups (_id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name text NOT NULL, CONSTRAINT idx_groups_name UNIQUE (name));</item>
         <item>CREATE TABLE members (_id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name text NOT NULL, comment text, is_dead integer NOT NULL DEFAULT 0, baptized integer NOT NULL DEFAULT 0);</item>
         <item>CREATE INDEX idx_members_name ON members (name);</item>
+        <item>CREATE TABLE members_groups ( id_members integer, id_groups integer, PRIMARY KEY (id_members, id_groups), FOREIGN KEY (id_groups) REFERENCES groups(_id), FOREIGN KEY (id_members) REFERENCES members(_id));</item>
     </string-array>
 
 </resources>

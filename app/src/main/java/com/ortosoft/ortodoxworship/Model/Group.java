@@ -17,7 +17,7 @@ import java.util.ArrayList;
  */
 public class Group {
 
-    private Group(long id, String name)
+    public Group(long id, String name)
     {
         _id = id;
         _name = name;
@@ -135,27 +135,25 @@ public class Group {
     }
 
     // Описание таблицы GROUPS
-    private static class TableGroup {
+    public static class TableGroup {
         public static final String NAME = "groups";
 
         // Названия столбцов
-        private static final String COLUMN_ID = "_id";
-        private static final String COLUMN_NAME = "name";
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_NAME = "name";
 
         // Номера столбцов
-        private static final int COLUMN_ID_NUM = 0;
-        private static final int COLUMN_NAME_NUM = 1;
+        public static final int COLUMN_ID_NUM = 0;
+        public static final int COLUMN_NAME_NUM = 1;
 
         private static void Update(long id, String name, SQLiteDatabase db){
             String sql = String.format("update %1$s set %2$s = '%3$s' where %4$s = %5$s", NAME, COLUMN_NAME, name, COLUMN_ID, id);
             db.execSQL(sql);
         }
-
         private static void Delete(Group group, SQLiteDatabase db){
             String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, group.get_id());
             db.execSQL(sql);
         }
-
         private static boolean CheckUnique(String msg)
         {
             return msg.startsWith("UNIQUE constraint");
