@@ -47,6 +47,7 @@ public class WorshipErrors extends Exception {
         WorshipErrors = new HashMap<Long, String>();
         WorshipErrors.put(new Long(1000), App.getContext().getString(R.string.error_group_name));
         WorshipErrors.put(new Long(1001), App.getContext().getString(R.string.error_unique_group_name));
+        WorshipErrors.put(new Long(1002), App.getContext().getString(R.string.error_unique_group_name));
     }
 
 }

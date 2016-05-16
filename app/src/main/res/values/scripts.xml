@@ -2,6 +2,8 @@
 <resources>
     <string-array name="script_ddl">
         <item>CREATE TABLE groups (_id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name text NOT NULL, CONSTRAINT idx_groups_name UNIQUE (name));</item>
+        <item>CREATE TABLE members (_id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name text NOT NULL, comment text, is_dead integer NOT NULL DEFAULT 0, baptized integer NOT NULL DEFAULT 0);</item>
+        <item>CREATE INDEX idx_members_name ON members (name);</item>
     </string-array>
 
 </resources>
