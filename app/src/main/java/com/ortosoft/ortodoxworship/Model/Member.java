@@ -212,7 +212,7 @@ public class Member
         _listOfGroup.remove(group);
     }
 
-    private static class TableMember {
+    public static class TableMember {
         public static final String NAME = "members";
 
         // Названия столбцов
@@ -237,6 +237,17 @@ public class Member
         private static void Delete(Member member, SQLiteDatabase db){
             String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, member.get_id());
             db.execSQL(sql);
+        }
+        public static int CountOfRows()
+        {
+            SQLiteDatabase db = SQLiteWorship.Item().get_db();
+            Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
+
+            try {
+                return mCursor.getCount();
+            } finally {
+                mCursor.close();
+            }
         }
 
     }
@@ -294,6 +305,18 @@ public class Member
                 mCursor.close();
             }
             return arrayList;
+        }
+
+        public static int CountOfRows()
+        {
+            SQLiteDatabase db = SQLiteWorship.Item().get_db();
+            Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
+
+            try {
+                return mCursor.getCount();
+            } finally {
+                mCursor.close();
+            }
         }
     }
 }

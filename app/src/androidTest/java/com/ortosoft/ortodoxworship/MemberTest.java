@@ -142,6 +142,12 @@ public class MemberTest extends ApplicationTestCase<Application> {
             list_groups = find_member.get_listOfGroup();
             assertEquals(1, list_groups.size());
             assertEquals(list_groups.get(0).get_name(), group.get_name());
+            assertEquals(1, Member.TableMembersGroups.CountOfRows());
+
+            // Пытаемся удалить member, с которым связаны группы
+            Member.Delete(find_member);
+            find_member = Member.FindById(member.get_id());
+            assertNull(find_member);
 
         } finally {
             db.endTransaction();
