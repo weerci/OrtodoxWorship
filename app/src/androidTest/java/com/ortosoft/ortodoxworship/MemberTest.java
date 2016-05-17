@@ -8,6 +8,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.ortosoft.ortodoxworship.Model.Group;
 import com.ortosoft.ortodoxworship.Model.Member;
 import com.ortosoft.ortodoxworship.common.State;
+import com.ortosoft.ortodoxworship.db.Connect;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class MemberTest extends ApplicationTestCase<Application> {
     @SmallTest
     public void test_select_all_member_and_delete_several() throws Exception
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         db.beginTransaction();
         try {
             // Тестируем сохранение
@@ -115,7 +116,7 @@ public class MemberTest extends ApplicationTestCase<Application> {
     @SmallTest
     public void test_add_remove_member_to_group() throws Exception
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         db.beginTransaction();
 
         try {

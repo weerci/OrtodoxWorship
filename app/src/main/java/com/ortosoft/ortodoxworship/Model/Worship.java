@@ -58,60 +58,32 @@ public class Worship {
     public enum Language { latin, greek, rus, eng }
 
     public static class TableWorship {
-        public static final String NAME = "members_groups";
+        // Название таблицы
+        public static final String TABLE_NAME = "worship";
 
-        // Названия столбцов
-        private static final String COLUMN_ID_MEMBER = "id_members";
-        private static final String COLUMN_ID_GROUP = "id_groups";
+        // Название столбцов
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_NAME = "name";
 
         // Номера столбцов
-        private static final int COLUMN_ID_MEMBER_NUM = 0;
-        private static final int COLUMN_ID_GROUP_NUM = 1;
+        public static final int NUM_COLUMN_ID = 0;
+        public static final int NUM_COLUMN_NAME = 1;
+    }
 
-        // Удаляются все записи связанные с конкретным пользователем
-        public static void DeleteByMember(long idMember, SQLiteDatabase db)
-        {
-            String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID_MEMBER, idMember);
-            db.execSQL(sql);
-        }
+    public static class TableWorshipsMembers {
+        // Название таблицы
+        public static final String NAME = "worships_members";
 
-        // Удаляются все записи связанные с конкретной группой
-        public static void DeleteByGroup(long idGroup, SQLiteDatabase db)
-        {
-            String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID_GROUP, idGroup);
-            db.execSQL(sql);
-        }
+        // Название столбцов
+        public static final String COLUMN_ID_MEMBER = "id_worship";
+        public static final String COLUMN_ID_GROUP = "id_member";
+        public static final String COLUMN_BY_ORD = "by_ord";
 
-        // Создается запись о принадлежности человека группе
-        public static void Insert(long idMember, long idGroup, SQLiteDatabase db)
-        {
-            ContentValues cv = new ContentValues();
-            cv.put(COLUMN_ID_MEMBER, idMember);
-            cv.put(COLUMN_ID_GROUP, idGroup);
-
-            db.insertOrThrow(NAME, null, cv);
-        }
-
-        // Выбирается список групп ассоциированных с пользователем
-        public static ArrayList<Group> LoadGroupOfMember(long _id, SQLiteDatabase db)
-        {
-            ArrayList<Group> arrayList = new ArrayList<>();
-            String sql = String.format("select g.* from members_groups mg left join groups g on mg.id_groups = g._id where mg.id_members = %1$d", _id);
-            Cursor mCursor = db.rawQuery(sql, new String [] {});
-            try {
-                mCursor.moveToFirst();
-                if (!mCursor.isAfterLast()) {
-                    do {
-                        long id = mCursor.getLong(Group.TableGroup.COLUMN_ID_NUM);
-                        String name = mCursor.getString(Group.TableGroup.COLUMN_NAME_NUM);
-                        arrayList.add(new Group(id, name));
-                    } while (mCursor.moveToNext());
-                }
-            } finally {
-                mCursor.close();
-            }
-            return arrayList;
-        }
+        // Номера столбцов
+        public static final int NUM_COLUMN_ID_WORSHIP = 0;
+        public static final int NUM_COLUMN_ID_MEMBER = 1;
+        public static final int NUM_COLUMN_BY_ORD = 2;
 
     }
+
 }

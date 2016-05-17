@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
+import com.ortosoft.ortodoxworship.db.Connect;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class Group {
             throw WorshipErrors.Item(1000, null);
         }
 
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         ContentValues cv = new ContentValues();
         cv.put(TableGroup.COLUMN_NAME, _name);
 
@@ -67,7 +68,7 @@ public class Group {
     // Удаляется выбранная группа
     public static void Delete(Group group) throws WorshipErrors
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         try {
             TableGroup.Delete(group, db);
         } catch (Exception e) {
@@ -77,7 +78,7 @@ public class Group {
     // Удвляется список групп
     public static void Delete(Group[] groups) throws WorshipErrors
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
 
         db.beginTransaction();
         try {
@@ -96,7 +97,7 @@ public class Group {
     // Находится группа по переданному имени
     public static Group FindByName(String name)
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         Cursor mCursor = db.query(TableGroup.NAME, null, TableGroup.COLUMN_NAME + " = ?", new String[] { name }, null, null, null);
 
         try {
@@ -115,7 +116,7 @@ public class Group {
     // Получение всех групп
     public static ArrayList<Group> FindAll()
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         Cursor mCursor = db.query(TableGroup.NAME, null, null, null, null, null, TableGroup.COLUMN_NAME);
         ArrayList<Group> arrayList = new ArrayList<>();
 

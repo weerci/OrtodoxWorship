@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
+import com.ortosoft.ortodoxworship.db.Connect;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
 import java.util.ArrayList;
@@ -73,13 +74,13 @@ public class Member
 
     private void load_groups()
     {
-        _listOfGroup = TableMembersGroups.LoadGroupOfMember(_id, SQLiteWorship.Item().get_db());
+        _listOfGroup = TableMembersGroups.LoadGroupOfMember(_id, Connect.Item().get_db());
     }
 
     // Удаление человека
     public static void Delete(Member member)
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         try {
             TableMember.Delete(member, db);
         } catch (Exception e) {
@@ -90,7 +91,7 @@ public class Member
     // Удвляется список людей
     public static void Delete(Member[] members) throws WorshipErrors
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
 
         db.beginTransaction();
         try {
@@ -109,7 +110,7 @@ public class Member
     // В базе ищется человек по заданному идентификатору
     public static Member FindById(long id)
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         Cursor mCursor = db.query(TableMember.NAME, null, TableMember.COLUMN_ID + " = ?", new String[] { String.valueOf(id) }, null, null, null);
 
         try {
@@ -134,7 +135,7 @@ public class Member
     // Находятся все люди в базе
     public static ArrayList<Member> FindAll()
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         Cursor mCursor = db.query(TableMember.NAME, null, null, null, null, null, TableMember.COLUMN_NAME);
         ArrayList<Member> arrayList = new ArrayList<>();
 
@@ -166,7 +167,7 @@ public class Member
             throw WorshipErrors.Item(1002, null);
         }
 
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         ContentValues cv = new ContentValues();
         cv.put(TableMember.COLUMN_NAME, _name);
         cv.put(TableMember.COLUMN_COMMENT, _comment);
@@ -240,7 +241,7 @@ public class Member
         }
         public static int CountOfRows()
         {
-            SQLiteDatabase db = SQLiteWorship.Item().get_db();
+            SQLiteDatabase db = Connect.Item().get_db();
             Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
 
             try {
@@ -309,7 +310,7 @@ public class Member
 
         public static int CountOfRows()
         {
-            SQLiteDatabase db = SQLiteWorship.Item().get_db();
+            SQLiteDatabase db = Connect.Item().get_db();
             Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
 
             try {

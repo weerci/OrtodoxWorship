@@ -8,6 +8,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.ortosoft.ortodoxworship.Model.Group;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
+import com.ortosoft.ortodoxworship.db.Connect;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
 import junit.framework.Assert;
@@ -33,7 +34,7 @@ public class GroupTest extends ApplicationTestCase<Application> {
     @SmallTest
     public void test_save_update_delete_find_group() throws Exception {
 
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         db.beginTransaction();
         try {
             // Тестируем сохранение
@@ -66,7 +67,7 @@ public class GroupTest extends ApplicationTestCase<Application> {
     @SmallTest
     public void test_load_duplicate_to_group() throws Exception{
 
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
 
         db.beginTransaction();
         try {
@@ -104,7 +105,7 @@ public class GroupTest extends ApplicationTestCase<Application> {
     @SmallTest
     public void test_select_all_group_and_delete_several() throws Exception
     {
-        SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         db.beginTransaction();
         try {
             // Тестируем сохранение
