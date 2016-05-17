@@ -19,6 +19,7 @@ import java.util.ArrayList;
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
 public class GroupTest extends ApplicationTestCase<Application> {
+
     public GroupTest() {
         super(Application.class);
     }

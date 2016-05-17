@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.util.Log;
 
 import com.ortosoft.ortodoxworship.App;
@@ -119,4 +120,12 @@ public class SQLiteWorship extends SQLiteOpenHelper {
                 "Метод onUpgrade для базы. Этот метод не должен никогда вызываться!!!");
     }
 
+/*
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            db.setForeignKeyConstraintsEnabled(true);
+        }
+    }
+*/
 }
