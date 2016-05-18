@@ -239,8 +239,7 @@ public class Member
             String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, member.get_id());
             db.execSQL(sql);
         }
-        public static int CountOfRows()
-        {
+        public static int CountOfRows(){
             SQLiteDatabase db = Connect.Item().get_db();
             Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
 

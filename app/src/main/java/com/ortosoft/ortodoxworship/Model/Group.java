@@ -155,9 +155,18 @@ public class Group {
             String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, group.get_id());
             db.execSQL(sql);
         }
-        private static boolean CheckUnique(String msg)
-        {
+        private static boolean CheckUnique(String msg){
             return msg.startsWith("UNIQUE constraint");
+        }
+        public static int CountOfRows(){
+            SQLiteDatabase db = Connect.Item().get_db();
+            Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
+
+            try {
+                return mCursor.getCount();
+            } finally {
+                mCursor.close();
+            }
         }
     }
 }

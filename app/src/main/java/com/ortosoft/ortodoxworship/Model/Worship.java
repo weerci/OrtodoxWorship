@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ortosoft.ortodoxworship.common.WorshipConst;
+import com.ortosoft.ortodoxworship.db.Connect;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -16,6 +17,12 @@ import java.util.HashMap;
 public class Worship {
 
     private long _id = WorshipConst.EMPTY_ID;
+
+    public Worship(long _id, String _name) {
+        this._id = _id;
+        this._name = _name;
+    }
+
     public long get_id() {
         return _id;
     }
@@ -50,16 +57,30 @@ public class Worship {
     }
 
     // Находит молитвословие по его имени
-    public static Worship FindByName(String worshipName, Language lang)
+    public static Worship FindByName(String name, Language lang)
     {
-        return null;
+        SQLiteDatabase db = Connect.Item().get_db();
+        Cursor mCursor = db.query(TableWorship.NAME, null, TableWorship.COLUMN_NAME + " = ?", new String[] { name }, null, null, null);
+
+        try {
+            mCursor.moveToFirst();
+            if (!mCursor.isAfterLast()){
+                long found_id = mCursor.getLong(TableWorship.NUM_COLUMN_ID);
+                String found_name  = mCursor.getString(TableWorship.NUM_COLUMN_NAME);
+                return new Worship(found_id, found_name);
+            } else {
+                return null;
+            }
+        } finally {
+            mCursor.close();
+        }
     }
 
     public enum Language { latin, greek, rus, eng }
 
     public static class TableWorship {
         // Название таблицы
-        public static final String TABLE_NAME = "worship";
+        public static final String NAME = "worships";
 
         // Название столбцов
         public static final String COLUMN_ID = "_id";
@@ -83,7 +104,6 @@ public class Worship {
         public static final int NUM_COLUMN_ID_WORSHIP = 0;
         public static final int NUM_COLUMN_ID_MEMBER = 1;
         public static final int NUM_COLUMN_BY_ORD = 2;
-
     }
 
 }

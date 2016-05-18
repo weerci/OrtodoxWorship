@@ -25,18 +25,6 @@ public class MemberTest extends ApplicationTestCase<Application> {
     private String name = "111";
     private String comment = "111_111";
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        member = new Member(name, comment);
-    }
-    @Override
-    protected void tearDown() throws Exception {
-        Member.Delete(member);
-
-        super.tearDown();
-    }
-
     @SmallTest
     public void test_create_new_member() throws Exception {
         assertEquals(name, member.get_name());
@@ -145,10 +133,55 @@ public class MemberTest extends ApplicationTestCase<Application> {
             assertEquals(list_groups.get(0).get_name(), group.get_name());
             assertEquals(1, Member.TableMembersGroups.CountOfRows());
 
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    @SmallTest
+    public void test_delete_member_bounded_with_group() throws Exception
+    {
+        SQLiteDatabase db = Connect.Item().get_db();
+        db.beginTransaction();
+
+        try {
+            Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
+            Group group = new Group("4444");
+            group.SaveOrUpdate();
+
+            member.AddToGroup(group);
+            member.SaveOrUpdate();
+
             // Пытаемся удалить member, с которым связаны группы
-            Member.Delete(find_member);
-            find_member = Member.FindById(member.get_id());
-            assertNull(find_member);
+            Member.Delete(member);
+            assertEquals(0, Member.TableMember.CountOfRows());
+            assertEquals(1, Group.TableGroup.CountOfRows());
+            assertEquals(0, Member.TableMembersGroups.CountOfRows());
+
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    @SmallTest
+    public void test_delete_group_bounded_with_member() throws Exception
+    {
+        SQLiteDatabase db = Connect.Item().get_db();
+        db.beginTransaction();
+
+        try {
+            Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
+            Group group = new Group("4444");
+            group.SaveOrUpdate();
+
+            member.AddToGroup(group);
+            member.SaveOrUpdate();
+
+            // Пытаемся удалить member, с которым связаны группы
+            Group.Delete(group);
+            assertEquals(1, Member.TableMember.CountOfRows());
+            assertEquals(0, Group.TableGroup.CountOfRows());
+            assertEquals(0, Member.TableMembersGroups.CountOfRows());
 
         } finally {
             db.endTransaction();

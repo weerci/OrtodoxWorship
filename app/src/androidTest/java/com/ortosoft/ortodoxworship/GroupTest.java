@@ -59,7 +59,7 @@ public class GroupTest extends ApplicationTestCase<Application> {
             Group.Delete(found_group_new);
             found_group_new = Group.FindByName(name_1);
             assertNull(found_group_new);
-            db.setTransactionSuccessful();
+
         } finally {
             db.endTransaction();
         }
