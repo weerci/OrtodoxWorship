@@ -7,11 +7,13 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.ortosoft.ortodoxworship.Model.Group;
 import com.ortosoft.ortodoxworship.Model.Member;
+import com.ortosoft.ortodoxworship.Model.Worship;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.db.Connect;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by admin on 14.05.2016.
@@ -191,30 +193,60 @@ public class MemberTest extends ApplicationTestCase<Application> {
     @SmallTest
     public void test_add_remove_member_to_worship() throws Exception
     {
-       /* SQLiteDatabase db = SQLiteWorship.Item().get_db();
+        SQLiteDatabase db = Connect.Item().get_db();
         db.beginTransaction();
 
         try {
-            Worship worshipMorning = new WorshipMorning();
-            Worship worship1Evening = new WorshipEvening();
+            Worship worshipMorning = Worship.FindByName("morning");
+            Worship worshipEvening = Worship.FindByName("evening");
+            assertNotNull(worshipMorning);
+            assertNotNull(worshipEvening);
 
-            Member member = new Member("123", "123", State.IsBaptized.yes, State.IsDead.no);
+            Member member = new Member("1111", "22222", State.IsBaptized.no, State.IsDead.no);
             member.AddToWorship(worshipMorning);
-            member.AddToWorship(worship1Evening);
-
+            member.AddToWorship(worshipEvening);
             member.SaveOrUpdate();
-            Member member_found = Member.FindById(member.get_id());
 
-            ArrayList<Worship> list_of_worships = member_found.get_listOfWorship();
-            assertEquals(2, list_of_worships.size());
+            Member find_member= Member.FindById(member.get_id());
+            ArrayList<Worship> list_worship = find_member.get_listOfWorship();
+            assertEquals(2, list_worship.size());
 
-            member_found.RemoveFromWorship(worshipMorning);
-            member_found.SaveOrUpdate();
-            assertEquals(1, list_of_worships.size());
+            member.RemoveFromWorship(worshipEvening);
+            member.SaveOrUpdate();
+            find_member = Member.FindById(member.get_id());
+            list_worship = find_member.get_listOfWorship();
+            assertEquals(1, list_worship.size());
+            assertEquals(list_worship.get(0).get_name(), worshipMorning.get_name());
+            assertEquals(1, Worship.TableWorshipsMembers.CountOfRows());
+
         } finally {
             db.endTransaction();
-        }*/
+        }
+    }
 
+    @SmallTest
+    public void test_delete_member_bounded_with_worship() throws Exception
+    {
+        SQLiteDatabase db = Connect.Item().get_db();
+        db.beginTransaction();
+
+        try {
+            Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
+            Worship worshipMorning = Worship.FindByName("morning");
+            Worship worshipEvening = Worship.FindByName("evening");
+
+            member.AddToWorship(worshipMorning);
+            member.AddToWorship(worshipEvening);
+            member.SaveOrUpdate();
+
+            // Пытаемся удалить member, с которым связаны группы
+            Member.Delete(member);
+            assertEquals(0, Worship.TableWorshipsMembers.CountOfRows());
+            assertEquals(0, Member.TableMember.CountOfRows());
+
+        } finally {
+            db.endTransaction();
+        }
     }
 }
 

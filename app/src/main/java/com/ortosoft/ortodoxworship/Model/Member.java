@@ -12,6 +12,7 @@ import com.ortosoft.ortodoxworship.db.Connect;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by admin on 16.05.2016.
@@ -56,6 +57,11 @@ public class Member
     private ArrayList<Group> _listOfGroup = new ArrayList<Group>();
     public ArrayList<Group> get_listOfGroup() {return _listOfGroup; }
 
+    private ArrayList<Worship> _listOfWorship = new ArrayList<>();
+    public ArrayList<Worship> get_listOfWorship() {
+        return _listOfWorship;
+    }
+
     // region Constructors
     private Member(long id, String name, String comment, State.IsBaptized isBaptized, State.IsDead isDead){
         this(name, comment, isBaptized, isDead);
@@ -72,9 +78,11 @@ public class Member
     }
     // endregion
 
-    private void load_groups()
-    {
+    private void load_groups(){
         _listOfGroup = TableMembersGroups.LoadGroupOfMember(_id, Connect.Item().get_db());
+    }
+    private void load_worship(){
+        _listOfWorship = TableMembersGroups.LoadWorshipOfMember(_id, Connect.Item().get_db());
     }
 
     // Удаление человека
@@ -87,7 +95,6 @@ public class Member
             throw e;
         }
     }
-
     // Удвляется список людей
     public static void Delete(Member[] members) throws WorshipErrors
     {
@@ -123,6 +130,7 @@ public class Member
                 State.IsDead found_dead  = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
                 Member member = new Member(found_id, found_name, found_comment, found_baptized, found_dead);
                 member.load_groups();
+                member.load_worship();
                 return member;
             } else {
                 return null;
@@ -131,7 +139,6 @@ public class Member
             mCursor.close();
         }
     }
-
     // Находятся все люди в базе
     public static ArrayList<Member> FindAll()
     {
@@ -150,6 +157,7 @@ public class Member
                     State.IsDead found_dead  = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
                     Member member = new Member(found_id, found_name, found_comment, found_baptized, found_dead);
                     member.load_groups();
+                    member.load_worship();
                     arrayList.add(member);
                 } while (mCursor.moveToNext());
             }
@@ -186,11 +194,16 @@ public class Member
                 throw e;
             }
 
-            if (_listOfGroup.size() > 0)
-            {
+            if (_listOfGroup.size() > 0){
                 TableMembersGroups.DeleteByMember(_id, db);
                 for (Group g: _listOfGroup)
                     TableMembersGroups.Insert(_id, g.get_id(), db);
+            }
+
+            if (_listOfWorship.size() > 0) {
+                Worship.TableWorshipsMembers.DeleteByMember(_id, db);
+                for (Worship w: _listOfWorship)
+                    Worship.TableWorshipsMembers.Insert(w.get_id(), _id, db);
             }
 
             db.setTransactionSuccessful();
@@ -206,11 +219,16 @@ public class Member
     {
         _listOfGroup.add(group);
     }
-
     // Удаляем человека из группы
     public void RemoveFromGroup(Group group)
     {
         _listOfGroup.remove(group);
+    }
+    // Привязка человека к молитвословию
+    public void AddToWorship(Worship worship) {_listOfWorship.add(worship); }
+    // Удаление человека из молитвословия
+    public void RemoveFromWorship(Worship worship){
+        _listOfWorship.remove(worship);
     }
 
     public static class TableMember {
@@ -263,22 +281,19 @@ public class Member
         private static final int COLUMN_ID_GROUP_NUM = 1;
 
         // Удаляются все записи связанные с конкретным пользователем
-        public static void DeleteByMember(long idMember, SQLiteDatabase db)
-        {
+        public static void DeleteByMember(long idMember, SQLiteDatabase db){
             String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID_MEMBER, idMember);
             db.execSQL(sql);
         }
 
         // Удаляются все записи связанные с конкретной группой
-        public static void DeleteByGroup(long idGroup, SQLiteDatabase db)
-        {
+        public static void DeleteByGroup(long idGroup, SQLiteDatabase db){
             String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID_GROUP, idGroup);
             db.execSQL(sql);
         }
 
         // Создается запись о принадлежности человека группе
-        public static void Insert(long idMember, long idGroup, SQLiteDatabase db)
-        {
+        public static void Insert(long idMember, long idGroup, SQLiteDatabase db){
             ContentValues cv = new ContentValues();
             cv.put(COLUMN_ID_MEMBER, idMember);
             cv.put(COLUMN_ID_GROUP, idGroup);
@@ -287,8 +302,7 @@ public class Member
         }
 
         // Выбирается список групп ассоциированных с пользователем
-        public static ArrayList<Group> LoadGroupOfMember(long _id, SQLiteDatabase db)
-        {
+        public static ArrayList<Group> LoadGroupOfMember(long _id, SQLiteDatabase db){
             ArrayList<Group> arrayList = new ArrayList<>();
             String sql = String.format("select g.* from members_groups mg left join groups g on mg.id_groups = g._id where mg.id_members = %1$d", _id);
             Cursor mCursor = db.rawQuery(sql, new String [] {});
@@ -299,6 +313,26 @@ public class Member
                         long id = mCursor.getLong(Group.TableGroup.COLUMN_ID_NUM);
                         String name = mCursor.getString(Group.TableGroup.COLUMN_NAME_NUM);
                         arrayList.add(new Group(id, name));
+                    } while (mCursor.moveToNext());
+                }
+            } finally {
+                mCursor.close();
+            }
+            return arrayList;
+        }
+
+        // Выбирается список молитвословий ассоциированных с пользователем
+        public static ArrayList<Worship> LoadWorshipOfMember(long _id, SQLiteDatabase db){
+            ArrayList<Worship> arrayList = new ArrayList<>();
+            String sql = String.format("select w.* from worships_members wm left join worships w on wm.id_worship = w._id where wm.id_member = %1$d", _id);
+            Cursor mCursor = db.rawQuery(sql, new String [] {});
+            try {
+                mCursor.moveToFirst();
+                if (!mCursor.isAfterLast()) {
+                    do {
+                        long id = mCursor.getLong(Group.TableGroup.COLUMN_ID_NUM);
+                        String name = mCursor.getString(Group.TableGroup.COLUMN_NAME_NUM);
+                        arrayList.add(new Worship(id, name));
                     } while (mCursor.moveToNext());
                 }
             } finally {

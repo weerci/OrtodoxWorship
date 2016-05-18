@@ -18,7 +18,8 @@ public class WorshipTest extends ApplicationTestCase<Application> {
     public void test_get_worship_by_name() throws Exception
     {
         String worshipName = "morning";
-        Worship worship = Worship.FindByName(worshipName, Worship.Language.rus);
+        Worship worship = Worship.FindByName(worshipName);
         assertEquals(worshipName, worship.get_name());
     }
+
 }
