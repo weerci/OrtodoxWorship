@@ -23,12 +23,12 @@ public class MemberTest extends ApplicationTestCase<Application> {
         super(Application.class);
     }
 
-    private Member member;
-    private String name = "111";
-    private String comment = "111_111";
-
     @SmallTest
     public void test_create_new_member() throws Exception {
+        String name = "111";
+        String comment = "111_111";
+        Member member = new Member(name, comment);
+
         assertEquals(name, member.get_name());
         assertEquals(comment, member.get_comment());
         assertEquals(State.IsBaptized.unknown, member.get_isBaptized());
@@ -53,24 +53,37 @@ public class MemberTest extends ApplicationTestCase<Application> {
 
     @SmallTest
     public void test_update_find_member() throws Exception {
-        name = "new_name";
-        comment = "new_comment";
-        State.IsBaptized isBaptized = State.IsBaptized.no;
-        State.IsDead isDead = State.IsDead.no;
+        String name = "111";
+        String comment = "111_111";
+        Member member = new Member(name, comment);
 
-        member.set_isIsDead(isDead);
-        member.set_isBaptized(isBaptized);
-        member.set_name(name);
-        member.set_comment(comment);
+        SQLiteDatabase db = Connect.Item().get_db();
+        db.beginTransaction();
 
-        member.SaveOrUpdate();
-        Member found_member = Member.FindById(member.get_id());
+        try {
+            member.SaveOrUpdate();
 
-        assertNotNull(found_member);
-        assertEquals(name, member.get_name());
-        assertEquals(comment, member.get_comment());
-        assertEquals(isBaptized, member.get_isBaptized());
-        assertEquals(isDead, member.get_isIsDead());
+            name = "new_name";
+            comment = "new_comment";
+            State.IsBaptized isBaptized = State.IsBaptized.no;
+            State.IsDead isDead = State.IsDead.no;
+
+            member.set_isIsDead(isDead);
+            member.set_isBaptized(isBaptized);
+            member.set_name(name);
+            member.set_comment(comment);
+            member.SaveOrUpdate();
+
+            Member found_member = Member.FindById(member.get_id());
+
+            assertNotNull(found_member);
+            assertEquals(name, member.get_name());
+            assertEquals(comment, member.get_comment());
+            assertEquals(isBaptized, member.get_isBaptized());
+            assertEquals(isDead, member.get_isIsDead());
+        } finally {
+            db.endTransaction();
+        }
     }
 
     @SmallTest

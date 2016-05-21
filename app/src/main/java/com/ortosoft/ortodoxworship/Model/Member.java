@@ -63,7 +63,7 @@ public class Member
     }
 
     // region Constructors
-    private Member(long id, String name, String comment, State.IsBaptized isBaptized, State.IsDead isDead){
+    public Member(long id, String name, String comment, State.IsBaptized isBaptized, State.IsDead isDead){
         this(name, comment, isBaptized, isDead);
         _id = id;
     }
@@ -235,25 +235,25 @@ public class Member
         public static final String NAME = "members";
 
         // Названия столбцов
-        private static final String COLUMN_ID = "_id";
-        private static final String COLUMN_NAME = "name";
-        private static final String COLUMN_COMMENT = "comment";
-        private static final String COLUMN_IS_DEAD = "is_dead";
-        private static final String COLUMN_BAPTIZED = "baptized";
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_COMMENT = "comment";
+        public static final String COLUMN_IS_DEAD = "is_dead";
+        public static final String COLUMN_BAPTIZED = "baptized";
 
         // Номера столбцов
-        private static final int COLUMN_ID_NUM = 0;
-        private static final int COLUMN_NAME_NUM = 1;
-        private static final int COLUMN_COMMENT_NUM = 2;
-        private static final int COLUMN_IS_DEAD_NUM = 3;
-        private static final int COLUMN_BAPTIZED_NUM = 4;
+        public static final int COLUMN_ID_NUM = 0;
+        public static final int COLUMN_NAME_NUM = 1;
+        public static final int COLUMN_COMMENT_NUM = 2;
+        public static final int COLUMN_IS_DEAD_NUM = 3;
+        public static final int COLUMN_BAPTIZED_NUM = 4;
 
-        private static void Update(long id, String name, String comment, int isBaptized, int isDead, SQLiteDatabase db){
+        public static void Update(long id, String name, String comment, int isBaptized, int isDead, SQLiteDatabase db){
             String sql = String.format("update %1$s set %2$s = '%3$s', %6$s = '%7$s', %8$s = %9$s, %10$s = %11$s where %4$s = %5$s",
                     NAME, COLUMN_NAME, name, COLUMN_ID, id, COLUMN_COMMENT, comment, COLUMN_BAPTIZED, isBaptized, COLUMN_IS_DEAD, isDead);
             db.execSQL(sql);
         }
-        private static void Delete(Member member, SQLiteDatabase db){
+        public static void Delete(Member member, SQLiteDatabase db){
             String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, member.get_id());
             db.execSQL(sql);
         }

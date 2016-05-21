@@ -7,6 +7,8 @@ import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.ortosoft.ortodoxworship.Model.Group;
+import com.ortosoft.ortodoxworship.Model.Member;
+import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.Connect;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
@@ -122,9 +124,44 @@ public class GroupTest extends ApplicationTestCase<Application> {
             list_found = Group.FindAll();
             assertEquals(0, list_found.size());
 
+
         } finally {
             db.endTransaction();
         }
+
+    }
+
+    @SmallTest
+    public void test_select_all_members_of_group() throws Exception{
+        Member member = new Member("111", "2222", State.IsBaptized.yes, State.IsDead.no);
+        Member member1 = new Member("222", "333", State.IsBaptized.yes, State.IsDead.no);
+
+        Group group = new Group("222");
+        group.AddMember(member);
+        group.AddMember(member1);
+
+        SQLiteDatabase db = Connect.Item().get_db();
+        db.beginTransaction();
+
+        try {
+            member.SaveOrUpdate();
+            member1.SaveOrUpdate();
+            group.SaveOrUpdate();
+
+            ArrayList<Member> array_members = Group.FindByName(group.get_name()).get_members();
+            assertEquals(2, array_members.size());
+
+            group.RemoveMember(member);
+            group.SaveOrUpdate();
+
+            assertEquals(1, group.get_members().size());
+            assertEquals(member1.get_name(), group.get_members().get(0).get_name());
+
+        } finally {
+            db.endTransaction();
+
+        }
+
 
     }
 

@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.Connect;
@@ -40,6 +41,24 @@ public class Group {
         _name = name;
     }
 
+    private ArrayList<Member> _members = new ArrayList<>();
+    public ArrayList<Member> get_members() {
+        return _members;
+    }
+
+    // Добавляет нового человека в список группы
+    public void AddMember(Member member){
+        _members.add(member);
+    }
+    // Удаляет человека из группы
+    public void RemoveMember(Member member){
+        _members.remove(member);
+    }
+
+    private void load_members() {
+        _members = TableGroup.LoadMembersOfGroup(_id, Connect.Item().get_db());
+    }
+
     // Группа сохраняется в базе данных
     public long SaveOrUpdate() throws WorshipErrors
     {
@@ -56,6 +75,13 @@ public class Group {
                 _id = db.insertOrThrow(TableGroup.NAME, null, cv);
             else
                 TableGroup.Update(_id, _name, db);
+
+            if (_members.size() > 0){
+                Member.TableMembersGroups.DeleteByGroup (_id, db);
+                for (Member m: _members)
+                    Member.TableMembersGroups.Insert(m.get_id(), _id, db);
+            }
+
         } catch (SQLException e) {
             if (TableGroup.CheckUnique(e.getMessage()))
                 throw WorshipErrors.Item(1001, null);
@@ -105,7 +131,9 @@ public class Group {
             if (!mCursor.isAfterLast()){
                 long found_id = mCursor.getLong(TableGroup.COLUMN_ID_NUM);
                 String found_name  = mCursor.getString(TableGroup.COLUMN_NAME_NUM);
-                return new Group(found_id, found_name);
+                Group group =  new Group(found_id, found_name);
+                group.load_members();
+                return group;
             } else {
                 return null;
             }
@@ -126,7 +154,9 @@ public class Group {
                 do{
                 long found_id = mCursor.getLong(TableGroup.COLUMN_ID_NUM);
                 String found_name  = mCursor.getString(TableGroup.COLUMN_NAME_NUM);
-                arrayList.add(new Group(found_id, found_name));
+                Group group = new Group(found_id, found_name);
+                group.load_members();
+                arrayList.add(group);
                 } while (mCursor.moveToNext());
             }
         } finally {
@@ -157,6 +187,27 @@ public class Group {
         }
         private static boolean CheckUnique(String msg){
             return msg.startsWith("UNIQUE constraint");
+        }
+        public static ArrayList<Member> LoadMembersOfGroup(long _id, SQLiteDatabase db){
+            ArrayList<Member> arrayList = new ArrayList<>();
+            String sql = String.format("select m.* from members_groups mg left join members m on mg.id_members = m._id where mg.id_groups = %1$d", _id);
+            Cursor mCursor = db.rawQuery(sql, new String [] {});
+            try {
+                mCursor.moveToFirst();
+                if (!mCursor.isAfterLast()) {
+                    do {
+                        long id = mCursor.getLong(Member.TableMember.COLUMN_ID_NUM);
+                        String name = mCursor.getString(Member.TableMember.COLUMN_NAME_NUM);
+                        String comment = mCursor.getString(Member.TableMember.COLUMN_COMMENT_NUM);
+                        State.IsBaptized isBaptized = State.IntToBaptized(mCursor.getInt(Member.TableMember.COLUMN_BAPTIZED_NUM));
+                        State.IsDead isDead = State.IntToDead(mCursor.getInt(Member.TableMember.COLUMN_IS_DEAD_NUM));
+                        arrayList.add(new Member(id, name, comment, isBaptized, isDead));
+                    } while (mCursor.moveToNext());
+                }
+            } finally {
+                mCursor.close();
+            }
+            return arrayList;
         }
         public static int CountOfRows(){
             SQLiteDatabase db = Connect.Item().get_db();
