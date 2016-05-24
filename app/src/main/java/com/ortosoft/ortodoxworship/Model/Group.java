@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.ortosoft.ortodoxworship.bus.EventGroup;
+import com.ortosoft.ortodoxworship.bus.IGroup;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
  * Created by admin on 11.05.2016.
  * Класс реализует функционла работы с группами людей, содержит код доступа к базе данных
  */
-public class Group {
+public class Group  {
 
     public Group(long id, String name)
     {
@@ -165,7 +167,7 @@ public class Group {
         return arrayList;
     }
 
-    // Описание таблицы GROUPS
+   // Описание таблицы GROUPS
     public static class TableGroup {
         public static final String NAME = "groups";
 

@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.ortosoft.ortodoxworship.bus.BusGroup;
+import com.ortosoft.ortodoxworship.bus.EventGroup;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
@@ -17,7 +19,7 @@ import java.util.HashMap;
 /**
  * Created by admin on 16.05.2016.
  */
-public class Member
+public class Member extends EventGroup
 {
     private long _id = WorshipConst.EMPTY_ID;
     public long get_id() { return _id; }
@@ -77,6 +79,12 @@ public class Member
         _comment = comment;
     }
     // endregion
+
+    @Override
+    protected void finalize() throws Throwable {
+        BusGroup.removeFromBus(this);
+        super.finalize();
+    }
 
     private void load_groups(){
         _listOfGroup = TableMembersGroups.LoadGroupOfMember(_id, Connect.Item().get_db());
