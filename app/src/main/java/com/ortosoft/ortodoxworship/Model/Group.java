@@ -5,13 +5,11 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ortosoft.ortodoxworship.bus.EventGroup;
-import com.ortosoft.ortodoxworship.bus.IGroup;
+import com.ortosoft.ortodoxworship.bus.BusGroup;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.Connect;
-import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
 import java.util.ArrayList;
 
@@ -62,8 +60,7 @@ public class Group  {
     }
 
     // Группа сохраняется в базе данных
-    public long SaveOrUpdate() throws WorshipErrors
-    {
+    public long SaveOrUpdate() throws WorshipErrors {
         if (_name == null) {
             throw WorshipErrors.Item(1000, null);
         }
@@ -75,8 +72,10 @@ public class Group  {
         try {
             if (_id == WorshipConst.EMPTY_ID)
                 _id = db.insertOrThrow(TableGroup.NAME, null, cv);
-            else
+            else{
                 TableGroup.Update(_id, _name, db);
+                BusGroup.updateGroup(this);
+            }
 
             if (_members.size() > 0){
                 Member.TableMembersGroups.DeleteByGroup (_id, db);
@@ -94,25 +93,25 @@ public class Group  {
         return _id;
     }
     // Удаляется выбранная группа
-    public static void Delete(Group group) throws WorshipErrors
-    {
+    public static void Delete(Group group) throws WorshipErrors {
         SQLiteDatabase db = Connect.Item().get_db();
         try {
             TableGroup.Delete(group, db);
+            BusGroup.deleteGroup(group);
         } catch (Exception e) {
             throw e;
         }
     }
     // Удвляется список групп
-    public static void Delete(Group[] groups) throws WorshipErrors
-    {
+    public static void Delete(Group[] groups) throws WorshipErrors {
         SQLiteDatabase db = Connect.Item().get_db();
 
         db.beginTransaction();
         try {
-            for (Group g : groups)
+            for (Group g : groups) {
                 TableGroup.Delete(g, db);
-
+                BusGroup.deleteGroup(g);
+            }
             db.setTransactionSuccessful();
         } catch (Exception e) {
             throw e;
@@ -123,8 +122,7 @@ public class Group  {
     }
 
     // Находится группа по переданному имени
-    public static Group FindByName(String name)
-    {
+    public static Group FindByName(String name) {
         SQLiteDatabase db = Connect.Item().get_db();
         Cursor mCursor = db.query(TableGroup.NAME, null, TableGroup.COLUMN_NAME + " = ?", new String[] { name }, null, null, null);
 
@@ -144,8 +142,7 @@ public class Group  {
         }
     }
     // Получение всех групп
-    public static ArrayList<Group> FindAll()
-    {
+    public static ArrayList<Group> FindAll() {
         SQLiteDatabase db = Connect.Item().get_db();
         Cursor mCursor = db.query(TableGroup.NAME, null, null, null, null, null, TableGroup.COLUMN_NAME);
         ArrayList<Group> arrayList = new ArrayList<>();
@@ -177,7 +174,6 @@ public class Group  {
         if (_id != group._id) return false;
         return _name.equals(group._name);
     }
-
     @Override
     public int hashCode() {
         int result = (int) (_id ^ (_id >>> 32));
@@ -202,8 +198,8 @@ public class Group  {
             db.execSQL(sql);
         }
         private static void Delete(Group group, SQLiteDatabase db){
-            String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, group.get_id());
-            db.execSQL(sql);
+          String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, group.get_id());
+          db.execSQL(sql);
         }
         private static boolean CheckUnique(String msg){
             return msg.startsWith("UNIQUE constraint");

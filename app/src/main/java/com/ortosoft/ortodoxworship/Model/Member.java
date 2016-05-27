@@ -245,11 +245,11 @@ public class Member implements EventGroup {
     }
     @Override
     public void OnUpdatedGroup(Group group) {
-
+        _mapOfGroup.get(group.get_id()).set_name(group.get_name());
     }
     @Override
     public void OnDeleteGroup(Group group) {
-
+        _mapOfGroup.remove(group.get_id());
     }
     // endregion
 

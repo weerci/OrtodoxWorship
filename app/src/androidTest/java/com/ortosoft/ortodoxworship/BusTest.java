@@ -22,7 +22,7 @@ public class BusTest extends ApplicationTestCase<Application> {
     }
 
     @SmallTest
-    public void test_register_event_for_insert_update_delete_group() throws Exception {
+    public void test_register_event_for_delete_group() throws Exception {
 
         SQLiteDatabase db = Connect.Item().get_db();
         db.beginTransaction();
@@ -42,6 +42,46 @@ public class BusTest extends ApplicationTestCase<Application> {
 
             // Объект member регистрируется как слушатель
             BusGroup.addToBus(member);
+            assertEquals(2, member.get_listOfGroup().size());
+
+            // Удаляем группу
+            Group.Delete(group);
+            assertEquals(1, member.get_listOfGroup().size());
+
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    @SmallTest
+    public void test_register_event_for_update_group() throws Exception {
+
+        SQLiteDatabase db = Connect.Item().get_db();
+        db.beginTransaction();
+
+        try {
+            // Создаем группы
+            Group group = new Group("123");
+            Group group1 = new Group("321");
+            group.SaveOrUpdate();
+            group1.SaveOrUpdate();
+
+            // Добавляем группы пользователю
+            Member member = new Member("111", "222", State.IsBaptized.yes, State.IsDead.no);
+            member.AddToGroup(group);
+            member.AddToGroup(group1);
+            member.SaveOrUpdate();
+
+            // Загружаем member из базы, что бы объекты групп member не ссылались на одну область памяти
+            Member new_member = Member.FindById(member.get_id());
+            assertEquals(group.get_name(), new_member.get_listOfGroup().get(group.get_id()).get_name());
+
+            BusGroup.addToBus(new_member);
+
+            String new_name = "33334";
+            group.set_name(new_name);
+            group.SaveOrUpdate();
+            assertEquals(group.get_name(), new_member.get_listOfGroup().get(group.get_id()).get_name());
 
         } finally {
             db.endTransaction();
