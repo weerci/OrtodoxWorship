@@ -167,7 +167,25 @@ public class Group  {
         return arrayList;
     }
 
-   // Описание таблицы GROUPS
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Group group = (Group) o;
+
+        if (_id != group._id) return false;
+        return _name.equals(group._name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (_id ^ (_id >>> 32));
+        result = 31 * result + _name.hashCode();
+        return result;
+    }
+
+    // Описание таблицы GROUPS
     public static class TableGroup {
         public static final String NAME = "groups";
 

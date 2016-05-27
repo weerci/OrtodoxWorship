@@ -30,7 +30,7 @@ public class BusGroup implements IGroup {
     @Override
     public void deleteGroup(Group group) {
         for (Member m: _memberList) {
-            m.OnDeleGroup(group);
+            m.OnDeleteGroup(group);
         }
 
     }

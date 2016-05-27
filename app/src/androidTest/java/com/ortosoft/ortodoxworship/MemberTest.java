@@ -134,18 +134,18 @@ public class MemberTest extends ApplicationTestCase<Application> {
             member.SaveOrUpdate();
 
             Member find_member = Member.FindById(member.get_id());
-            ArrayList<Group> list_groups = find_member.get_listOfGroup();
+            HashMap<Long, Group> list_groups = find_member.get_listOfGroup();
 
             assertEquals(2, list_groups.size());
-            assertEquals(list_groups.get(0).get_name(), group.get_name());
-            assertEquals(list_groups.get(1).get_name(), group1.get_name());
+            assertEquals(list_groups.get(group.get_id()).get_name(), group.get_name());
+            assertEquals(list_groups.get(group1.get_id()).get_name(), group1.get_name());
 
             member.RemoveFromGroup(group1);
             member.SaveOrUpdate();
             find_member = Member.FindById(member.get_id());
             list_groups = find_member.get_listOfGroup();
             assertEquals(1, list_groups.size());
-            assertEquals(list_groups.get(0).get_name(), group.get_name());
+            assertEquals(list_groups.get(group.get_id()).get_name(), group.get_name());
             assertEquals(1, Member.TableMembersGroups.CountOfRows());
 
         } finally {

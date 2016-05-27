@@ -19,8 +19,7 @@ import java.util.HashMap;
 /**
  * Created by admin on 16.05.2016.
  */
-public class Member extends EventGroup
-{
+public class Member implements EventGroup {
     private long _id = WorshipConst.EMPTY_ID;
     public long get_id() { return _id; }
 
@@ -56,8 +55,8 @@ public class Member extends EventGroup
         this._isIsDead = _isIsDead;
     }
 
-    private ArrayList<Group> _listOfGroup = new ArrayList<Group>();
-    public ArrayList<Group> get_listOfGroup() {return _listOfGroup; }
+    private HashMap<Long, Group> _mapOfGroup = new HashMap<>();
+    public HashMap<Long,Group> get_listOfGroup() {return _mapOfGroup; }
 
     private ArrayList<Worship> _listOfWorship = new ArrayList<>();
     public ArrayList<Worship> get_listOfWorship() {
@@ -87,7 +86,7 @@ public class Member extends EventGroup
     }
 
     private void load_groups(){
-        _listOfGroup = TableMembersGroups.LoadGroupOfMember(_id, Connect.Item().get_db());
+        _mapOfGroup = TableMembersGroups.LoadGroupOfMember(_id, Connect.Item().get_db());
     }
     private void load_worship(){
         _listOfWorship = TableMembersGroups.LoadWorshipOfMember(_id, Connect.Item().get_db());
@@ -202,9 +201,9 @@ public class Member extends EventGroup
                 throw e;
             }
 
-            if (_listOfGroup.size() > 0){
+            if (_mapOfGroup.size() > 0){
                 TableMembersGroups.DeleteByMember(_id, db);
-                for (Group g: _listOfGroup)
+                for (Group g: _mapOfGroup.values())
                     TableMembersGroups.Insert(_id, g.get_id(), db);
             }
 
@@ -225,12 +224,12 @@ public class Member extends EventGroup
     // Добавление человека в группу
     public void AddToGroup(Group group)
     {
-        _listOfGroup.add(group);
+        _mapOfGroup.put(group.get_id(), group);
     }
     // Удаляем человека из группы
     public void RemoveFromGroup(Group group)
     {
-        _listOfGroup.remove(group);
+        _mapOfGroup.remove(group.get_id());
     }
     // Привязка человека к молитвословию
     public void AddToWorship(Worship worship) {_listOfWorship.add(worship); }
@@ -238,6 +237,21 @@ public class Member extends EventGroup
     public void RemoveFromWorship(Worship worship){
         _listOfWorship.remove(worship);
     }
+
+    // region Implements EventGroup
+    @Override
+    public void OnAddedGroup(Group group) {
+
+    }
+    @Override
+    public void OnUpdatedGroup(Group group) {
+
+    }
+    @Override
+    public void OnDeleteGroup(Group group) {
+
+    }
+    // endregion
 
     public static class TableMember {
         public static final String NAME = "members";
@@ -310,8 +324,8 @@ public class Member extends EventGroup
         }
 
         // Выбирается список групп ассоциированных с пользователем
-        public static ArrayList<Group> LoadGroupOfMember(long _id, SQLiteDatabase db){
-            ArrayList<Group> arrayList = new ArrayList<>();
+        public static HashMap<Long, Group> LoadGroupOfMember(long _id, SQLiteDatabase db){
+            HashMap<Long, Group> mapList = new HashMap<>();
             String sql = String.format("select g.* from members_groups mg left join groups g on mg.id_groups = g._id where mg.id_members = %1$d", _id);
             Cursor mCursor = db.rawQuery(sql, new String [] {});
             try {
@@ -320,13 +334,13 @@ public class Member extends EventGroup
                     do {
                         long id = mCursor.getLong(Group.TableGroup.COLUMN_ID_NUM);
                         String name = mCursor.getString(Group.TableGroup.COLUMN_NAME_NUM);
-                        arrayList.add(new Group(id, name));
+                        mapList.put(id, new Group(id, name));
                     } while (mCursor.moveToNext());
                 }
             } finally {
                 mCursor.close();
             }
-            return arrayList;
+            return mapList;
         }
 
         // Выбирается список молитвословий ассоциированных с пользователем
