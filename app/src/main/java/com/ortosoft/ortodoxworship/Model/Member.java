@@ -120,6 +120,12 @@ public class Member implements EventGroup {
         }
     }
 
+    @Override
+    public void finalize() throws Throwable {
+        BusGroup.Item().RemoveFromBus(this);
+        super.finalize();
+    }
+
     // В базе ищется человек по заданному идентификатору
     public static Member FindById(long id)
     {

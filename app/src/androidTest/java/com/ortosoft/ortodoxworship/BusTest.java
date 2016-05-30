@@ -20,68 +20,63 @@ public class BusTest extends ApplicationTestCase<Application> {
     public BusTest() {
         super(Application.class);
     }
+    SQLiteDatabase db = Connect.Item().get_db();
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        db.beginTransaction();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        db.endTransaction();
+        super.tearDown();
+    }
 
     @SmallTest
     public void test_register_event_for_delete_group() throws Exception {
+        // Создаем группы
+        Group group = new Group("123");
+        Group group1 = new Group("321");
+        group.SaveOrUpdate();
+        group1.SaveOrUpdate();
 
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+        // Добавляем группы пользователю
+        Member member = new Member("111", "222", State.IsBaptized.yes, State.IsDead.no);
+        member.AddToGroup(group);
+        member.AddToGroup(group1);
+        member.SaveOrUpdate();
 
-        try {
-            // Создаем группы
-            Group group = new Group("123");
-            Group group1 = new Group("321");
-            group.SaveOrUpdate();
-            group1.SaveOrUpdate();
+        assertEquals(2, member.get_listOfGroup().size());
 
-            // Добавляем группы пользователю
-            Member member = new Member("111", "222", State.IsBaptized.yes, State.IsDead.no);
-            member.AddToGroup(group);
-            member.AddToGroup(group1);
-            member.SaveOrUpdate();
-
-            assertEquals(2, member.get_listOfGroup().size());
-
-            // Удаляем группу
-            Group.Delete(group);
-            assertEquals(1, member.get_listOfGroup().size());
-
-        } finally {
-            db.endTransaction();
-        }
+        // Удаляем группу
+        Group.Delete(group);
+        assertEquals(1, member.get_listOfGroup().size());
     }
 
     @SmallTest
     public void test_register_event_for_update_group() throws Exception {
+        // Создаем группы
+        Group group = new Group("123");
+        Group group1 = new Group("321");
+        group.SaveOrUpdate();
+        group1.SaveOrUpdate();
 
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+        // Добавляем группы пользователю
+        Member member = new Member("111", "222", State.IsBaptized.yes, State.IsDead.no);
+        member.AddToGroup(group);
+        member.AddToGroup(group1);
+        member.SaveOrUpdate();
 
-        try {
-            // Создаем группы
-            Group group = new Group("123");
-            Group group1 = new Group("321");
-            group.SaveOrUpdate();
-            group1.SaveOrUpdate();
+        // Загружаем member из базы, что бы объекты групп member не ссылались на одну область памяти
+        Member new_member = Member.FindById(member.get_id());
+        assertEquals(group.get_name(), new_member.get_listOfGroup().get(group.get_id()).get_name());
 
-            // Добавляем группы пользователю
-            Member member = new Member("111", "222", State.IsBaptized.yes, State.IsDead.no);
-            member.AddToGroup(group);
-            member.AddToGroup(group1);
-            member.SaveOrUpdate();
-
-            // Загружаем member из базы, что бы объекты групп member не ссылались на одну область памяти
-            Member new_member = Member.FindById(member.get_id());
-            assertEquals(group.get_name(), new_member.get_listOfGroup().get(group.get_id()).get_name());
-
-            String new_name = "33334";
-            group.set_name(new_name);
-            group.SaveOrUpdate();
-            assertEquals(group.get_name(), new_member.get_listOfGroup().get(group.get_id()).get_name());
-
-        } finally {
-            db.endTransaction();
-        }
+        String new_name = "33334";
+        group.set_name(new_name);
+        group.SaveOrUpdate();
+        assertEquals(group.get_name(), new_member.get_listOfGroup().get(group.get_id()).get_name());
     }
 
 }

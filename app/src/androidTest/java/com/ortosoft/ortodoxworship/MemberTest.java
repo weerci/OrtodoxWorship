@@ -22,8 +22,22 @@ import java.util.HashMap;
  * Created by admin on 14.05.2016.
  */
 public class MemberTest extends ApplicationTestCase<Application> {
+
     public MemberTest() {
         super(Application.class);
+    }
+    SQLiteDatabase db = Connect.Item().get_db();
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        db.beginTransaction();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        db.endTransaction();
+        super.tearDown();
     }
 
     @SmallTest
@@ -60,211 +74,165 @@ public class MemberTest extends ApplicationTestCase<Application> {
         String comment = "111_111";
         Member member = new Member(name, comment);
 
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+        member.SaveOrUpdate();
 
-        try {
-            member.SaveOrUpdate();
+        name = "new_name";
+        comment = "new_comment";
+        State.IsBaptized isBaptized = State.IsBaptized.no;
+        State.IsDead isDead = State.IsDead.no;
 
-            name = "new_name";
-            comment = "new_comment";
-            State.IsBaptized isBaptized = State.IsBaptized.no;
-            State.IsDead isDead = State.IsDead.no;
+        member.set_isIsDead(isDead);
+        member.set_isBaptized(isBaptized);
+        member.set_name(name);
+        member.set_comment(comment);
+        member.SaveOrUpdate();
 
-            member.set_isIsDead(isDead);
-            member.set_isBaptized(isBaptized);
-            member.set_name(name);
-            member.set_comment(comment);
-            member.SaveOrUpdate();
+        Member found_member = Member.FindById(member.get_id());
 
-            Member found_member = Member.FindById(member.get_id());
-
-            assertNotNull(found_member);
-            assertEquals(name, member.get_name());
-            assertEquals(comment, member.get_comment());
-            assertEquals(isBaptized, member.get_isBaptized());
-            assertEquals(isDead, member.get_isIsDead());
-        } finally {
-            db.endTransaction();
-        }
+        assertNotNull(found_member);
+        assertEquals(name, member.get_name());
+        assertEquals(comment, member.get_comment());
+        assertEquals(isBaptized, member.get_isBaptized());
+        assertEquals(isDead, member.get_isIsDead());
     }
 
     @SmallTest
-    public void test_select_all_member_and_delete_several() throws Exception
-    {
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
-        try {
-            // Тестируем сохранение
-            Member[] array_created = new Member[] {
-                    new Member("1", "1", State.IsBaptized.no, State.IsDead.no),
-                    new Member("2", "2", State.IsBaptized.no, State.IsDead.no),
-                    new Member("3", "3", State.IsBaptized.yes, State.IsDead.yes),
-                    new Member("4", "4", State.IsBaptized.yes, State.IsDead.yes) };
-            for (Member m : array_created) {
-                m.SaveOrUpdate();
-            }
-
-            ArrayList<Member> list_found = Member.FindAll();
-            assertEquals(array_created.length, list_found.size());
-
-            // Тестируем удаление
-            Member.Delete(array_created);
-            list_found = Member.FindAll();
-            assertEquals(0, list_found.size());
-
-        } finally {
-            db.endTransaction();
+    public void test_select_all_member_and_delete_several() throws Exception {
+        // Тестируем сохранение
+        Member[] array_created = new Member[] {
+                new Member("1", "1", State.IsBaptized.no, State.IsDead.no),
+                new Member("2", "2", State.IsBaptized.no, State.IsDead.no),
+                new Member("3", "3", State.IsBaptized.yes, State.IsDead.yes),
+                new Member("4", "4", State.IsBaptized.yes, State.IsDead.yes) };
+        for (Member m : array_created) {
+            m.SaveOrUpdate();
         }
 
+        ArrayList<Member> list_found = Member.FindAll();
+        assertEquals(array_created.length, list_found.size());
+
+        // Тестируем удаление
+        Member.Delete(array_created);
+        list_found = Member.FindAll();
+        assertEquals(0, list_found.size());
     }
 
     @SmallTest
-    public void test_add_remove_member_to_group() throws Exception
-    {
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+    public void test_add_remove_member_to_group() throws Exception {
+        Group group = new Group("123");
+        Group group1 = new Group("321");
+        group.SaveOrUpdate();
+        group1.SaveOrUpdate();
 
-        try {
-            Group group = new Group("123");
-            Group group1 = new Group("321");
-            group.SaveOrUpdate();
-            group1.SaveOrUpdate();
+        Member member = new Member("111", "222", State.IsBaptized.yes, State.IsDead.no);
+        member.AddToGroup(group);
+        member.AddToGroup(group1);
+        member.SaveOrUpdate();
 
-            Member member = new Member("111", "222", State.IsBaptized.yes, State.IsDead.no);
-            member.AddToGroup(group);
-            member.AddToGroup(group1);
-            member.SaveOrUpdate();
+        Member find_member = Member.FindById(member.get_id());
+        HashMap<Long, Group> list_groups = find_member.get_listOfGroup();
 
-            Member find_member = Member.FindById(member.get_id());
-            HashMap<Long, Group> list_groups = find_member.get_listOfGroup();
+        assertEquals(2, list_groups.size());
+        assertEquals(list_groups.get(group.get_id()).get_name(), group.get_name());
+        assertEquals(list_groups.get(group1.get_id()).get_name(), group1.get_name());
 
-            assertEquals(2, list_groups.size());
-            assertEquals(list_groups.get(group.get_id()).get_name(), group.get_name());
-            assertEquals(list_groups.get(group1.get_id()).get_name(), group1.get_name());
-
-            member.RemoveFromGroup(group1);
-            member.SaveOrUpdate();
-            find_member = Member.FindById(member.get_id());
-            list_groups = find_member.get_listOfGroup();
-            assertEquals(1, list_groups.size());
-            assertEquals(list_groups.get(group.get_id()).get_name(), group.get_name());
-            assertEquals(1, Member.TableMembersGroups.CountOfRows());
-
-        } finally {
-            db.endTransaction();
-        }
+        member.RemoveFromGroup(group1);
+        member.SaveOrUpdate();
+        find_member = Member.FindById(member.get_id());
+        list_groups = find_member.get_listOfGroup();
+        assertEquals(1, list_groups.size());
+        assertEquals(list_groups.get(group.get_id()).get_name(), group.get_name());
+        assertEquals(1, Member.TableMembersGroups.CountOfRows());
     }
 
     @SmallTest
-    public void test_delete_member_bounded_with_group() throws Exception
-    {
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+    public void test_delete_member_bounded_with_group() throws Exception {
+        Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
+        Group group = new Group("4444");
+        group.SaveOrUpdate();
 
-        try {
-            Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
-            Group group = new Group("4444");
-            group.SaveOrUpdate();
+        member.AddToGroup(group);
+        member.SaveOrUpdate();
 
-            member.AddToGroup(group);
-            member.SaveOrUpdate();
-
-            // Пытаемся удалить member, с которым связаны группы
-            Member.Delete(member);
-            assertEquals(0, Member.TableMember.CountOfRows());
-            assertEquals(1, Group.TableGroup.CountOfRows());
-            assertEquals(0, Member.TableMembersGroups.CountOfRows());
-
-        } finally {
-            db.endTransaction();
-        }
+        // Пытаемся удалить member, с которым связаны группы
+        Member.Delete(member);
+        assertEquals(0, Member.TableMember.CountOfRows());
+        assertEquals(1, Group.TableGroup.CountOfRows());
+        assertEquals(0, Member.TableMembersGroups.CountOfRows());
     }
 
     @SmallTest
-    public void test_delete_group_bounded_with_member() throws Exception
-    {
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+    public void test_delete_group_bounded_with_member() throws Exception {
+        Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
+        Group group = new Group("4444");
+        group.SaveOrUpdate();
 
-        try {
-            Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
-            Group group = new Group("4444");
-            group.SaveOrUpdate();
+        member.AddToGroup(group);
+        member.SaveOrUpdate();
 
-            member.AddToGroup(group);
-            member.SaveOrUpdate();
-
-            // Пытаемся удалить member, с которым связаны группы
-            Group.Delete(group);
-            assertEquals(1, Member.TableMember.CountOfRows());
-            assertEquals(0, Group.TableGroup.CountOfRows());
-            assertEquals(0, Member.TableMembersGroups.CountOfRows());
-
-        } finally {
-            db.endTransaction();
-        }
+        // Пытаемся удалить member, с которым связаны группы
+        Group.Delete(group);
+        assertEquals(1, Member.TableMember.CountOfRows());
+        assertEquals(0, Group.TableGroup.CountOfRows());
+        assertEquals(0, Member.TableMembersGroups.CountOfRows());
     }
 
     @SmallTest
-    public void test_add_remove_member_to_worship() throws Exception
-    {
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+    public void test_add_remove_member_to_worship() throws Exception{
+        Worship worshipMorning = Worship.FindByName("morning");
+        Worship worshipEvening = Worship.FindByName("evening");
+        assertNotNull(worshipMorning);
+        assertNotNull(worshipEvening);
 
-        try {
-            Worship worshipMorning = Worship.FindByName("morning");
-            Worship worshipEvening = Worship.FindByName("evening");
-            assertNotNull(worshipMorning);
-            assertNotNull(worshipEvening);
+        Member member = new Member("1111", "22222", State.IsBaptized.no, State.IsDead.no);
+        member.AddToWorship(worshipMorning);
+        member.AddToWorship(worshipEvening);
+        member.SaveOrUpdate();
 
-            Member member = new Member("1111", "22222", State.IsBaptized.no, State.IsDead.no);
-            member.AddToWorship(worshipMorning);
-            member.AddToWorship(worshipEvening);
-            member.SaveOrUpdate();
+        Member find_member= Member.FindById(member.get_id());
+        ArrayList<Worship> list_worship = find_member.get_listOfWorship();
+        assertEquals(2, list_worship.size());
 
-            Member find_member= Member.FindById(member.get_id());
-            ArrayList<Worship> list_worship = find_member.get_listOfWorship();
-            assertEquals(2, list_worship.size());
-
-            member.RemoveFromWorship(worshipEvening);
-            member.SaveOrUpdate();
-            find_member = Member.FindById(member.get_id());
-            list_worship = find_member.get_listOfWorship();
-            assertEquals(1, list_worship.size());
-            assertEquals(list_worship.get(0).get_name(), worshipMorning.get_name());
-            assertEquals(1, Worship.TableWorshipsMembers.CountOfRows());
-
-        } finally {
-            db.endTransaction();
-        }
+        member.RemoveFromWorship(worshipEvening);
+        member.SaveOrUpdate();
+        find_member = Member.FindById(member.get_id());
+        list_worship = find_member.get_listOfWorship();
+        assertEquals(1, list_worship.size());
+        assertEquals(list_worship.get(0).get_name(), worshipMorning.get_name());
+        assertEquals(1, Worship.TableWorshipsMembers.CountOfRows());
     }
 
     @SmallTest
-    public void test_delete_member_bounded_with_worship() throws Exception
-    {
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+    public void test_delete_member_bounded_with_worship() throws Exception {
+        Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
+        Worship worshipMorning = Worship.FindByName("morning");
+        Worship worshipEvening = Worship.FindByName("evening");
 
-        try {
-            Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
-            Worship worshipMorning = Worship.FindByName("morning");
-            Worship worshipEvening = Worship.FindByName("evening");
+        member.AddToWorship(worshipMorning);
+        member.AddToWorship(worshipEvening);
+        member.SaveOrUpdate();
 
-            member.AddToWorship(worshipMorning);
-            member.AddToWorship(worshipEvening);
-            member.SaveOrUpdate();
-
-            // Пытаемся удалить member, с которым связаны группы
-            Member.Delete(member);
-            assertEquals(0, Worship.TableWorshipsMembers.CountOfRows());
-            assertEquals(0, Member.TableMember.CountOfRows());
-
-        } finally {
-            db.endTransaction();
-        }
+        // Пытаемся удалить member, с которым связаны группы
+        Member.Delete(member);
+        assertEquals(0, Worship.TableWorshipsMembers.CountOfRows());
+        assertEquals(0, Member.TableMember.CountOfRows());
     }
 
+    @SmallTest
+    public void test_finalization() throws Exception {
+        Member member = new Member("111", "222", State.IsBaptized.no, State.IsDead.no);
+        member.set_comment("3333");
+        member.SaveOrUpdate();
+        assertEquals(member.get_name(), BusGroup.Item().get_memberList().get(member.get_id()).get_name());
+
+        try {
+            member.finalize();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+        Runtime.getRuntime().runFinalization();
+        assertEquals(null, BusGroup.Item().get_memberList().get(member.get_id()));
+    }
 
 }
 

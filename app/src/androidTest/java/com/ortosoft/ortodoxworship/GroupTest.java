@@ -25,6 +25,19 @@ public class GroupTest extends ApplicationTestCase<Application> {
     public GroupTest() {
         super(Application.class);
     }
+    SQLiteDatabase db = Connect.Item().get_db();
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        db.beginTransaction();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        db.endTransaction();
+        super.tearDown();
+    }
 
     @SmallTest
     public void test_create_new_group() throws Exception {
@@ -36,99 +49,75 @@ public class GroupTest extends ApplicationTestCase<Application> {
 
     @SmallTest
     public void test_save_update_delete_find_group() throws Exception {
+        // Тестируем сохранение
+        String name = "222";
+        Group group = new Group(name);
+        group.SaveOrUpdate();
+        Group found_group = Group.FindByName(name);
+        assertEquals(name, found_group.get_name());
 
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
-        try {
-            // Тестируем сохранение
-            String name = "222";
-            Group group = new Group(name);
-            group.SaveOrUpdate();
-            Group found_group = Group.FindByName(name);
-            assertEquals(name, found_group.get_name());
+        // Тестируем изменение
+        String name_1 = "333";
+        group.set_name(name_1);
+        group.SaveOrUpdate();
+        found_group = Group.FindByName(name);
+        Group found_group_new = Group.FindByName(name_1);
 
-            // Тестируем изменение
-            String name_1 = "333";
-            group.set_name(name_1);
-            group.SaveOrUpdate();
-            found_group = Group.FindByName(name);
-            Group found_group_new = Group.FindByName(name_1);
+        assertNull(found_group);
+        assertNotNull(found_group_new);
 
-            assertNull(found_group);
-            assertNotNull(found_group_new);
-
-            // Тестируем удаление
-            Group.Delete(found_group_new);
-            found_group_new = Group.FindByName(name_1);
-            assertNull(found_group_new);
-
-        } finally {
-            db.endTransaction();
-        }
+        // Тестируем удаление
+        Group.Delete(found_group_new);
+        found_group_new = Group.FindByName(name_1);
+        assertNull(found_group_new);
     }
 
     @SmallTest
     public void test_load_duplicate_to_group() throws Exception{
 
-        SQLiteDatabase db = Connect.Item().get_db();
-
-        db.beginTransaction();
+        // Тестирование вставки дубликатов
         try {
-            // Тестирование вставки дубликатов
-            try {
-                Group[] array_created = new Group[] { new Group("111"), new Group("111"), new Group("111"),new Group("111") };
-                for (Group g : array_created)
-                    g.SaveOrUpdate();
+            Group[] array_created = new Group[] { new Group("111"), new Group("111"), new Group("111"),new Group("111") };
+            for (Group g : array_created)
+                g.SaveOrUpdate();
 
-                Assert.fail("WorshipErrors not throw");
+            Assert.fail("WorshipErrors not throw");
 
-            } catch (WorshipErrors worshipErrors) {
-                assertEquals(1001, worshipErrors.get_id());
-            }
+        } catch (WorshipErrors worshipErrors) {
+            assertEquals(1001, worshipErrors.get_id());
+        }
 
-            // Тестирование изменения записей, при которых возникают дубликаты
-            try {
-                Group[] array_created = new Group[] { new Group("111"), new Group("222"), new Group("333"),new Group("444") };
-                for (Group g : array_created)
-                    g.SaveOrUpdate();
+        // Тестирование изменения записей, при которых возникают дубликаты
+        try {
+            Group[] array_created = new Group[] { new Group("111"), new Group("222"), new Group("333"),new Group("444") };
+            for (Group g : array_created)
+                g.SaveOrUpdate();
 
-                array_created[1].set_name("111");
-                array_created[1].SaveOrUpdate();
+            array_created[1].set_name("111");
+            array_created[1].SaveOrUpdate();
 
-                Assert.fail("WorshipErrors not throw");
+            Assert.fail("WorshipErrors not throw");
 
-            } catch (WorshipErrors worshipErrors) {
-                assertEquals(1001, worshipErrors.get_id());
-            }
-        } finally {
-            db.endTransaction();
+        } catch (WorshipErrors worshipErrors) {
+            assertEquals(1001, worshipErrors.get_id());
         }
     }
 
     @SmallTest
     public void test_select_all_group_and_delete_several() throws Exception
     {
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
-        try {
-            // Тестируем сохранение
-            Group[] array_created = new Group[] { new Group("111"), new Group("222"), new Group("333"),new Group("444") };
-            for (Group g : array_created) {
-                g.SaveOrUpdate();
-            }
-            ArrayList<Group> list_found = Group.FindAll();
-            assertEquals(array_created.length, list_found.size());
-
-            // Тестируем удаление
-            Group.Delete(array_created);
-            list_found = Group.FindAll();
-            assertEquals(0, list_found.size());
-
-
-        } finally {
-            db.endTransaction();
+        // Тестируем сохранение
+        Group[] array_created = new Group[] { new Group("111"), new Group("222"), new Group("333"),new Group("444") };
+        for (Group g : array_created) {
+            g.SaveOrUpdate();
         }
+        ArrayList<Group> list_found = Group.FindAll();
+        assertEquals(array_created.length, list_found.size());
 
+        // Тестируем удаление
+        Group.Delete(array_created);
+        list_found = Group.FindAll();
+        assertEquals(0, list_found.size());
     }
 
     @SmallTest
@@ -140,28 +129,18 @@ public class GroupTest extends ApplicationTestCase<Application> {
         group.AddMember(member);
         group.AddMember(member1);
 
-        SQLiteDatabase db = Connect.Item().get_db();
-        db.beginTransaction();
+        member.SaveOrUpdate();
+        member1.SaveOrUpdate();
+        group.SaveOrUpdate();
 
-        try {
-            member.SaveOrUpdate();
-            member1.SaveOrUpdate();
-            group.SaveOrUpdate();
+        ArrayList<Member> array_members = Group.FindByName(group.get_name()).get_members();
+        assertEquals(2, array_members.size());
 
-            ArrayList<Member> array_members = Group.FindByName(group.get_name()).get_members();
-            assertEquals(2, array_members.size());
+        group.RemoveMember(member);
+        group.SaveOrUpdate();
 
-            group.RemoveMember(member);
-            group.SaveOrUpdate();
-
-            assertEquals(1, group.get_members().size());
-            assertEquals(member1.get_name(), group.get_members().get(0).get_name());
-
-        } finally {
-            db.endTransaction();
-
-        }
-
+        assertEquals(1, group.get_members().size());
+        assertEquals(member1.get_name(), group.get_members().get(0).get_name());
 
     }
 
