@@ -40,8 +40,6 @@ public class BusTest extends ApplicationTestCase<Application> {
             member.AddToGroup(group1);
             member.SaveOrUpdate();
 
-            // Объект member регистрируется как слушатель
-            BusGroup.addToBus(member);
             assertEquals(2, member.get_listOfGroup().size());
 
             // Удаляем группу
@@ -76,8 +74,6 @@ public class BusTest extends ApplicationTestCase<Application> {
             Member new_member = Member.FindById(member.get_id());
             assertEquals(group.get_name(), new_member.get_listOfGroup().get(group.get_id()).get_name());
 
-            BusGroup.addToBus(new_member);
-
             String new_name = "33334";
             group.set_name(new_name);
             group.SaveOrUpdate();
@@ -86,8 +82,6 @@ public class BusTest extends ApplicationTestCase<Application> {
         } finally {
             db.endTransaction();
         }
-
-
     }
 
 }

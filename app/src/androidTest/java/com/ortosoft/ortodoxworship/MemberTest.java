@@ -8,9 +8,12 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.ortosoft.ortodoxworship.Model.Group;
 import com.ortosoft.ortodoxworship.Model.Member;
 import com.ortosoft.ortodoxworship.Model.Worship;
+import com.ortosoft.ortodoxworship.bus.BusGroup;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.db.Connect;
 import com.ortosoft.ortodoxworship.db.SQLiteWorship;
+
+import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -261,5 +264,7 @@ public class MemberTest extends ApplicationTestCase<Application> {
             db.endTransaction();
         }
     }
+
+
 }
 

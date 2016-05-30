@@ -74,7 +74,7 @@ public class Group  {
                 _id = db.insertOrThrow(TableGroup.NAME, null, cv);
             else{
                 TableGroup.Update(_id, _name, db);
-                BusGroup.updateGroup(this);
+                BusGroup.Item().EventUpdateGroup(this);
             }
 
             if (_members.size() > 0){
@@ -97,7 +97,7 @@ public class Group  {
         SQLiteDatabase db = Connect.Item().get_db();
         try {
             TableGroup.Delete(group, db);
-            BusGroup.deleteGroup(group);
+            BusGroup.Item().EventDeleteGroup(group);
         } catch (Exception e) {
             throw e;
         }
@@ -110,7 +110,7 @@ public class Group  {
         try {
             for (Group g : groups) {
                 TableGroup.Delete(g, db);
-                BusGroup.deleteGroup(g);
+                BusGroup.Item().EventDeleteGroup(g);
             }
             db.setTransactionSuccessful();
         } catch (Exception e) {

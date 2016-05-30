@@ -20,6 +20,7 @@ import java.util.HashMap;
  * Created by admin on 16.05.2016.
  */
 public class Member implements EventGroup {
+
     private long _id = WorshipConst.EMPTY_ID;
     public long get_id() { return _id; }
 
@@ -76,14 +77,10 @@ public class Member implements EventGroup {
     public Member(String name, String comment) {
         _name = name;
         _comment = comment;
+        BusGroup.Item().AddToBus(this);
     }
-    // endregion
 
-    @Override
-    protected void finalize() throws Throwable {
-        BusGroup.removeFromBus(this);
-        super.finalize();
-    }
+    // endregion
 
     private void load_groups(){
         _mapOfGroup = TableMembersGroups.LoadGroupOfMember(_id, Connect.Item().get_db());
@@ -98,6 +95,7 @@ public class Member implements EventGroup {
         SQLiteDatabase db = Connect.Item().get_db();
         try {
             TableMember.Delete(member, db);
+            BusGroup.Item().RemoveFromBus(member);
         } catch (Exception e) {
             throw e;
         }
@@ -109,9 +107,10 @@ public class Member implements EventGroup {
 
         db.beginTransaction();
         try {
-            for (Member m : members)
+            for (Member m : members) {
                 TableMember.Delete(m, db);
-
+                BusGroup.Item().RemoveFromBus(m);
+            }
             db.setTransactionSuccessful();
         } catch (Exception e) {
             throw e;
@@ -176,8 +175,7 @@ public class Member implements EventGroup {
     }
 
     // Человек сохраняется или его данные обновляются в базе данных
-    public long SaveOrUpdate() throws WorshipErrors
-    {
+    public long SaveOrUpdate() throws WorshipErrors{
         if (_name == null) {
             throw WorshipErrors.Item(1002, null);
         }
@@ -193,8 +191,10 @@ public class Member implements EventGroup {
         try {
 
             try {
-                if (_id == WorshipConst.EMPTY_ID)
+                if (_id == WorshipConst.EMPTY_ID) {
                     _id = db.insertOrThrow(TableMember.NAME, null, cv);
+                    BusGroup.Item().AddToBus(this);
+                }
                 else
                     TableMember.Update(_id, _name, _comment, State.BaptizedToInt(_isBaptized), State.DeadToInt(_isIsDead), db);
             } catch (SQLException e) {
@@ -245,7 +245,10 @@ public class Member implements EventGroup {
     }
     @Override
     public void OnUpdatedGroup(Group group) {
-        _mapOfGroup.get(group.get_id()).set_name(group.get_name());
+        Group g =_mapOfGroup.get(group.get_id());
+        if (g != null) {
+            g.set_name(group.get_name());
+        }
     }
     @Override
     public void OnDeleteGroup(Group group) {

@@ -11,36 +11,46 @@ import java.util.HashMap;
  */
 public class BusGroup  {
 
-    private static HashMap<Long, Member> _memberList = new HashMap<>();
+    private HashMap<Long, Member> _memberList = new HashMap<>();
+    public HashMap<Long, Member> get_memberList() {
+        return _memberList;
+    }
+
+    private static BusGroup _busGroup;
+
+    public static BusGroup Item(){
+        if (_busGroup == null) {
+            _busGroup = new BusGroup();
+        }
+        return _busGroup;
+    }
 
     // region Для публикатора
-    public static void addGroup(Group group) {
+    public void EventAddGroup(Group group) {
         for (Member m: _memberList.values()) {
             m.OnAddedGroup(group);
         }
     }
-
-    public static void updateGroup(Group group) {
+    public void EventUpdateGroup(Group group) {
         for (Member m: _memberList.values()) {
             m.OnUpdatedGroup(group);
         }
 
     }
-
-    public static void deleteGroup(Group group) {
+    public void EventDeleteGroup(Group group) {
         for (Member m: _memberList.values()) {
             m.OnDeleteGroup(group);
         }
     }
     // endregion
 
-
     // region Для слушателя
-    public static void addToBus(Member member){
+    public void AddToBus(Member member){
         _memberList.put(member.get_id(), member);
     }
-    public static void removeFromBus(Member member){
+    public void RemoveFromBus(Member member){
         _memberList.remove(member.get_id());
     }
     // endregion
+
 }
