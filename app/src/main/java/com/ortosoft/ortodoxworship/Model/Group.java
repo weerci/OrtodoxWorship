@@ -12,6 +12,7 @@ import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.Connect;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by admin on 11.05.2016.
@@ -41,18 +42,18 @@ public class Group  {
         _name = name;
     }
 
-    private ArrayList<Member> _members = new ArrayList<>();
-    public ArrayList<Member> get_members() {
+    private HashMap<Long, Member> _members = new HashMap<>();
+    public HashMap<Long, Member> get_members() {
         return _members;
     }
 
     // Добавляет нового человека в список группы
     public void AddMember(Member member){
-        _members.add(member);
+        _members.put(member.get_id(), member);
     }
     // Удаляет человека из группы
     public void RemoveMember(Member member){
-        _members.remove(member);
+        _members.remove(member.get_id());
     }
 
     private void load_members() {
@@ -79,7 +80,7 @@ public class Group  {
 
             if (_members.size() > 0){
                 Member.TableMembersGroups.DeleteByGroup (_id, db);
-                for (Member m: _members)
+                for (Member m: _members.values())
                     Member.TableMembersGroups.Insert(m.get_id(), _id, db);
             }
 
@@ -204,8 +205,8 @@ public class Group  {
         private static boolean CheckUnique(String msg){
             return msg.startsWith("UNIQUE constraint");
         }
-        public static ArrayList<Member> LoadMembersOfGroup(long _id, SQLiteDatabase db){
-            ArrayList<Member> arrayList = new ArrayList<>();
+        public static HashMap<Long, Member> LoadMembersOfGroup(long _id, SQLiteDatabase db){
+            HashMap<Long, Member> hashMap = new HashMap<>();
             String sql = String.format("select m.* from members_groups mg left join members m on mg.id_members = m._id where mg.id_groups = %1$d", _id);
             Cursor mCursor = db.rawQuery(sql, new String [] {});
             try {
@@ -217,13 +218,13 @@ public class Group  {
                         String comment = mCursor.getString(Member.TableMember.COLUMN_COMMENT_NUM);
                         State.IsBaptized isBaptized = State.IntToBaptized(mCursor.getInt(Member.TableMember.COLUMN_BAPTIZED_NUM));
                         State.IsDead isDead = State.IntToDead(mCursor.getInt(Member.TableMember.COLUMN_IS_DEAD_NUM));
-                        arrayList.add(new Member(id, name, comment, isBaptized, isDead));
+                        hashMap.put(id, new Member(id, name, comment, isBaptized, isDead));
                     } while (mCursor.moveToNext());
                 }
             } finally {
                 mCursor.close();
             }
-            return arrayList;
+            return hashMap;
         }
         public static int CountOfRows(){
             SQLiteDatabase db = Connect.Item().get_db();

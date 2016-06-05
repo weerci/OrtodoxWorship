@@ -16,6 +16,7 @@ import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
@@ -124,23 +125,22 @@ public class GroupTest extends ApplicationTestCase<Application> {
     public void test_select_all_members_of_group() throws Exception{
         Member member = new Member("111", "2222", State.IsBaptized.yes, State.IsDead.no);
         Member member1 = new Member("222", "333", State.IsBaptized.yes, State.IsDead.no);
+        member.SaveOrUpdate();
+        member1.SaveOrUpdate();
 
         Group group = new Group("222");
         group.AddMember(member);
         group.AddMember(member1);
-
-        member.SaveOrUpdate();
-        member1.SaveOrUpdate();
         group.SaveOrUpdate();
 
-        ArrayList<Member> array_members = Group.FindByName(group.get_name()).get_members();
+        HashMap<Long, Member> array_members = Group.FindByName(group.get_name()).get_members();
         assertEquals(2, array_members.size());
 
         group.RemoveMember(member);
         group.SaveOrUpdate();
 
         assertEquals(1, group.get_members().size());
-        assertEquals(member1.get_name(), group.get_members().get(0).get_name());
+        assertEquals(member1.get_name(), group.get_members().get(member1.get_id()).get_name());
 
     }
 
