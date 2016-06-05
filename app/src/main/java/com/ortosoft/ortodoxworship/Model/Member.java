@@ -6,6 +6,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ortosoft.ortodoxworship.bus.BusGroup;
+import com.ortosoft.ortodoxworship.bus.BusMember;
 import com.ortosoft.ortodoxworship.bus.EventGroup;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
@@ -90,25 +91,25 @@ public class Member implements EventGroup {
     }
 
     // Удаление человека
-    public static void Delete(Member member)
-    {
+    public static void Delete(Member member){
         SQLiteDatabase db = Connect.Item().get_db();
         try {
             TableMember.Delete(member, db);
+            BusMember.Item().EventDeleteMember(member);
             BusGroup.Item().RemoveFromBus(member);
         } catch (Exception e) {
             throw e;
         }
     }
     // Удвляется список людей
-    public static void Delete(Member[] members) throws WorshipErrors
-    {
+    public static void Delete(Member[] members) throws WorshipErrors{
         SQLiteDatabase db = Connect.Item().get_db();
 
         db.beginTransaction();
         try {
             for (Member m : members) {
                 TableMember.Delete(m, db);
+                BusMember.Item().EventDeleteMember(m);
                 BusGroup.Item().RemoveFromBus(m);
             }
             db.setTransactionSuccessful();
@@ -201,8 +202,10 @@ public class Member implements EventGroup {
                     _id = db.insertOrThrow(TableMember.NAME, null, cv);
                     BusGroup.Item().AddToBus(this);
                 }
-                else
+                else {
                     TableMember.Update(_id, _name, _comment, State.BaptizedToInt(_isBaptized), State.DeadToInt(_isIsDead), db);
+                    BusMember.Item().EventUpdateMember(this);
+                }
             } catch (SQLException e) {
                 throw e;
             }

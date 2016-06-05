@@ -6,6 +6,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ortosoft.ortodoxworship.bus.BusGroup;
+import com.ortosoft.ortodoxworship.bus.BusMember;
+import com.ortosoft.ortodoxworship.bus.EventMember;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
@@ -18,15 +20,21 @@ import java.util.HashMap;
  * Created by admin on 11.05.2016.
  * Класс реализует функционла работы с группами людей, содержит код доступа к базе данных
  */
-public class Group  {
+public class Group implements EventMember {
 
-    public Group(long id, String name)
-    {
+    public Group(long id, String name) {
+        this(name);
         _id = id;
-        _name = name;
     }
     public Group(String name) {
         _name = name;
+        BusMember.Item().AddToBus(this);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        BusMember.Item().RemoveFromBus(this);
+        super.finalize();
     }
 
     private long _id = WorshipConst.EMPTY_ID;
@@ -71,8 +79,10 @@ public class Group  {
         cv.put(TableGroup.COLUMN_NAME, _name);
 
         try {
-            if (_id == WorshipConst.EMPTY_ID)
+            if (_id == WorshipConst.EMPTY_ID) {
                 _id = db.insertOrThrow(TableGroup.NAME, null, cv);
+                BusMember.Item().AddToBus(this);
+            }
             else{
                 TableGroup.Update(_id, _name, db);
                 BusGroup.Item().EventUpdateGroup(this);
@@ -99,6 +109,7 @@ public class Group  {
         try {
             TableGroup.Delete(group, db);
             BusGroup.Item().EventDeleteGroup(group);
+            BusMember.Item().RemoveFromBus(group);
         } catch (Exception e) {
             throw e;
         }
@@ -112,6 +123,7 @@ public class Group  {
             for (Group g : groups) {
                 TableGroup.Delete(g, db);
                 BusGroup.Item().EventDeleteGroup(g);
+                BusMember.Item().RemoveFromBus(g);
             }
             db.setTransactionSuccessful();
         } catch (Exception e) {
@@ -180,6 +192,22 @@ public class Group  {
         int result = (int) (_id ^ (_id >>> 32));
         result = 31 * result + _name.hashCode();
         return result;
+    }
+
+    @Override
+    public void OnUpdatedMember(Member member) {
+        Member m = _members.get(member.get_id());
+        if ( m != null) {
+            m.set_name(member.get_name());
+            m.set_comment(member.get_comment());
+            m.set_isIsDead(member.get_isIsDead());
+            m.set_isBaptized(member.get_isBaptized());
+        }
+    }
+
+    @Override
+    public void OnDeleteMember(Member member) {
+        _members.remove(member.get_id());
     }
 
     // Описание таблицы GROUPS

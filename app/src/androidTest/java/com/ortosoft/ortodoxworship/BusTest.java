@@ -35,7 +35,7 @@ public class BusTest extends ApplicationTestCase<Application> {
     }
 
     @SmallTest
-    public void test_register_event_for_delete_group() throws Exception {
+    public void test_event_for_delete_group() throws Exception {
         // Создаем группы
         Group group = new Group("123");
         Group group1 = new Group("321");
@@ -56,7 +56,7 @@ public class BusTest extends ApplicationTestCase<Application> {
     }
 
     @SmallTest
-    public void test_register_event_for_update_group() throws Exception {
+    public void test_event_for_update_group() throws Exception {
         // Создаем группы
         Group group = new Group("123");
         Group group1 = new Group("321");
@@ -79,4 +79,64 @@ public class BusTest extends ApplicationTestCase<Application> {
         assertEquals(group.get_name(), new_member.get_listOfGroup().get(group.get_id()).get_name());
     }
 
+    @SmallTest
+    public void test_event_for_delete_member() throws Exception {
+        Member member = new Member("111","2222", State.IsBaptized.yes, State.IsDead.no);
+        Member member1 = new Member("2222","3333", State.IsBaptized.yes, State.IsDead.no);
+        member.SaveOrUpdate();
+        member1.SaveOrUpdate();
+
+        Group group = new Group("1111");
+        group.AddMember(member);
+        group.AddMember(member1);
+
+        Group group1 = new Group("2222");
+        group1.AddMember(member);
+        group1.AddMember(member1);
+
+        group.SaveOrUpdate();
+        group1.SaveOrUpdate();
+
+        Member.Delete(member);
+        assertEquals(1, group.get_members().size());
+        assertEquals(1, group1.get_members().size());
+        assertEquals(2, Member.TableMembersGroups.CountOfRows());
+
+    }
+
+    @SmallTest
+    public void test_event_for_update_member() throws Exception {
+        String name = "111";
+        String comment = "111";
+        State.IsBaptized isBaptized = State.IsBaptized.no;
+        State.IsDead isDead = State.IsDead.no;
+
+        Member member = new Member(name, comment, isBaptized, isDead);
+        member.SaveOrUpdate();
+
+        String nameGroup = "222";
+        Group group = new Group(nameGroup);
+        group.AddMember(member);
+        group.SaveOrUpdate();
+
+        Group group1 = Group.FindByName(nameGroup);
+
+        name = "222";
+        comment = "222";
+        isBaptized = State.IsBaptized.yes;
+        isDead = State.IsDead.yes;
+
+        member.set_name(name);
+        member.set_comment(comment);
+        member.set_isBaptized(isBaptized);
+        member.set_isIsDead(isDead);
+        member.SaveOrUpdate();
+
+        assertEquals(name, group1.get_members().get(member.get_id()).get_name());
+        assertEquals(comment, group1.get_members().get(member.get_id()).get_comment());
+        assertEquals(isBaptized, group1.get_members().get(member.get_id()).get_isBaptized());
+        assertEquals(isDead, group1.get_members().get(member.get_id()).get_isIsDead());
+
+
+    }
 }
