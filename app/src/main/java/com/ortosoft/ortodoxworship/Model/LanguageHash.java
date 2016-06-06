@@ -25,10 +25,12 @@ public class LanguageHash {
 
     private HashMap<Worship.Language, HashMap<Long, Prayer>> _prayersHash = new HashMap();
     public HashMap<Long, Prayer> Prayers(Worship.Language language){
-        HashMap<Long, Prayer> _prayers = _prayersHash.get(language);
-        if (_prayers == null)
-            return _prayersHash.put(language, selectPrayersByLanguage(_id, language));
-        return _prayers;
+        HashMap<Long, Prayer> prayers = _prayersHash.get(language);
+        if (prayers == null){
+            _prayersHash.put(language, selectPrayersByLanguage(_id, language));
+            prayers = _prayersHash.get(language);
+        }
+        return prayers;
     }
 
     private HashMap<Long, Prayer> selectPrayersByLanguage(long id, Worship.Language language){
@@ -46,7 +48,7 @@ public class LanguageHash {
                     String name = mCursor.getString(QueryWorship.NUM_COLUMN_LANG_NAME);
                     String body = mCursor.getString(QueryWorship.NUM_COLUMN_BODY);
                     String comment = mCursor.getString(QueryWorship.NUM_COLUMN_COMMENT);
-                    prayersMap.put(id, new Prayer(id_prayer, name, body, comment));
+                    prayersMap.put(id_prayer, new Prayer(id_prayer, name, body, comment));
                 } while (mCursor.moveToNext());
             }
         } finally {
