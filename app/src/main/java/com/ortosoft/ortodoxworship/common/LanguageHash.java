@@ -38,7 +38,10 @@ public class LanguageHash {
     }
 
     private HashMap<Long, Prayer> load_cks(long id){
-        return null;
+        HashMap<Long, Prayer> _prayers = _prayersHash.get(id);
+        if (_prayers == null) {
+
+        };
     }
 
     private HashMap<Long, Prayer> load_eng(long id){
@@ -57,5 +60,6 @@ public class LanguageHash {
         return null;
     }
     //endregion
+
 
 }

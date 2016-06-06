@@ -17,6 +17,8 @@ import java.util.HashMap;
  */
 public class Worship {
 
+    private LanguageHash _laLanguageHash;
+
     private long _id = WorshipConst.EMPTY_ID;
     public long get_id() {
         return _id;
@@ -26,18 +28,16 @@ public class Worship {
     public String get_name() {
         return _name;
     }
-    public void set_name(String _name) {
-        this._name = _name;
-    }
 
     private HashMap<Long, Prayer> _prayers = new HashMap<>();
     public HashMap<Long, Prayer> get_prayers(Language language) {
-        return LanguageHash.Prayers(_id, language);
+        return _laLanguageHash.Prayers(language);
     }
 
     public Worship(long id, String name) {
         _id = id;
         _name = name;
+        _laLanguageHash = new LanguageHash(id);
     }
 
     // Находит молитвословие по его имени
@@ -61,7 +61,6 @@ public class Worship {
     }
 
     public enum Language { latin, greek, rus, eng, cks }
-
     public static class TableWorship {
         // Название таблицы
         public static final String NAME = "worships";
