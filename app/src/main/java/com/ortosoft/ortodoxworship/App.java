@@ -10,7 +10,8 @@ import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 import java.io.IOException;
 
 /**
- * Created by admin on 11.05.2016.
+ * Created by admin on 11.05.2016 at 03: 02.
+ * Класс содержит глобальные переменные
  */
 public class App extends Application {
     private static App _instance;
@@ -30,12 +31,8 @@ public class App extends Application {
         try {
             SQLiteWorship.Initialize();
             Log.d("It's ok", "really, really");
-        } catch (SQLiteException ex) {
+        } catch (SQLiteException | IOException ex) {
             ex.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
     }
 

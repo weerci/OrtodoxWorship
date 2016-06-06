@@ -16,15 +16,16 @@ import com.ortosoft.ortodoxworship.db.Connect;
 import java.util.ArrayList;
 
 /**
- * Created by admin on 14.05.2016.
+ * Created by admin on 14.05.2016 at 03: 03.
+ * Тестирование работы с пользователями
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "FinalizeCalledExplicitly", "unused"})
 public class MemberTest extends ApplicationTestCase<Application> {
 
     public MemberTest() {
         super(Application.class);
     }
-    SQLiteDatabase db = Connect.Item().get_db();
+    private final SQLiteDatabase db = Connect.Item().get_db();
 
     @Override
     protected void setUp() throws Exception {

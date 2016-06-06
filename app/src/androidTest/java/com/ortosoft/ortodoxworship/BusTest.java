@@ -7,21 +7,21 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.ortosoft.ortodoxworship.Model.Group;
 import com.ortosoft.ortodoxworship.Model.Member;
-import com.ortosoft.ortodoxworship.bus.BusGroup;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.db.Connect;
 
 
 /**
- * Created by dima on 24.05.2016.
+ * Created by dima on 24.05.2016 at 03: 02 at 03: 03.
+ * Тестирование работы с событиями удаления, изменения групп и пользователей
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "unused"})
 public class BusTest extends ApplicationTestCase<Application> {
 
     public BusTest() {
         super(Application.class);
     }
-    SQLiteDatabase db = Connect.Item().get_db();
+    private final SQLiteDatabase db = Connect.Item().get_db();
 
     @Override
     protected void setUp() throws Exception {

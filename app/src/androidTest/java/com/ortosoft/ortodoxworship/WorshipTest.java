@@ -8,12 +8,11 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.ortosoft.ortodoxworship.Model.Prayer;
 import com.ortosoft.ortodoxworship.Model.Worship;
 
-import java.util.HashMap;
-
 /**
- * Created by dima on 16.05.2016.
+ * Created by dima on 16.05.2016 at 03: 04.
+ * Тестирование работы с молитвословием
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "unused"})
 public class WorshipTest extends ApplicationTestCase<Application> {
     public WorshipTest() {
         super(Application.class);

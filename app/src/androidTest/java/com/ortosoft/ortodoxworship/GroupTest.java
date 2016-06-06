@@ -4,7 +4,6 @@ import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.util.LongSparseArray;
 import android.test.ApplicationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.ortosoft.ortodoxworship.Model.Group;
@@ -19,13 +18,13 @@ import java.util.ArrayList;
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "unused"})
 public class GroupTest extends ApplicationTestCase<Application> {
 
     public GroupTest() {
         super(Application.class);
     }
-    SQLiteDatabase db = Connect.Item().get_db();
+    private final SQLiteDatabase db = Connect.Item().get_db();
 
     @Override
     protected void setUp() throws Exception {

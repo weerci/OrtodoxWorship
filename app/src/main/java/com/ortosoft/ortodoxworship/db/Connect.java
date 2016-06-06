@@ -4,7 +4,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 
 /**
- * Created by admin on 17.05.2016.
+ * Created by admin on 17.05.2016 at 03: 03.
+ * Соединение с базой данных
  */
 public class Connect {
     // region Fields

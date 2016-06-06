@@ -1,13 +1,10 @@
 package com.ortosoft.ortodoxworship.Model;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-
-import com.ortosoft.ortodoxworship.db.Connect;
-
 /**
- * Created by dima on 16.05.2016.
+ * Created by dima on 16.05.2016 at 03: 04.
+ * Класс представляет отдельную молитву
  */
+@SuppressWarnings("unused")
 public class Prayer {
     private long _id;
 

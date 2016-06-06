@@ -1,9 +1,10 @@
 package com.ortosoft.ortodoxworship.Model;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.support.v4.util.LongSparseArray;
 
 import com.ortosoft.ortodoxworship.bus.BusGroup;
@@ -15,9 +16,11 @@ import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.Connect;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
- * Created by admin on 16.05.2016.
+ * Created by admin on 16.05.2016 at 03: 03.
+ * Класс пользователя
  */
 public class Member implements EventGroup {
 
@@ -92,16 +95,12 @@ public class Member implements EventGroup {
     // Удаление человека
     public static void Delete(Member member){
         SQLiteDatabase db = Connect.Item().get_db();
-        try {
-            TableMember.Delete(member, db);
-            BusMember.Item().EventDeleteMember(member);
-            BusGroup.Item().RemoveFromBus(member);
-        } catch (Exception e) {
-            throw e;
-        }
+        TableMember.Delete(member, db);
+        BusMember.Item().EventDeleteMember(member);
+        BusGroup.Item().RemoveFromBus(member);
     }
     // Удвляется список людей
-    public static void Delete(Member[] members) throws WorshipErrors{
+    public static void Delete(Member[] members) {
         SQLiteDatabase db = Connect.Item().get_db();
 
         db.beginTransaction();
@@ -112,10 +111,7 @@ public class Member implements EventGroup {
                 BusGroup.Item().RemoveFromBus(m);
             }
             db.setTransactionSuccessful();
-        } catch (Exception e) {
-            throw e;
-        }
-        finally {
+        } finally {
             db.endTransaction();
         }
     }
@@ -127,19 +123,19 @@ public class Member implements EventGroup {
     }
 
     // В базе ищется человек по заданному идентификатору
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static Member FindById(long id)
     {
         SQLiteDatabase db = Connect.Item().get_db();
-        Cursor mCursor = db.query(TableMember.NAME, null, TableMember.COLUMN_ID + " = ?", new String[] { String.valueOf(id) }, null, null, null);
 
-        try {
+        try (Cursor mCursor = db.query(TableMember.NAME, null, TableMember.COLUMN_ID + " = ?", new String[]{String.valueOf(id)}, null, null, null)) {
             mCursor.moveToFirst();
-            if (!mCursor.isAfterLast()){
+            if (!mCursor.isAfterLast()) {
                 long found_id = mCursor.getLong(TableMember.COLUMN_ID_NUM);
-                String found_name  = mCursor.getString(TableMember.COLUMN_NAME_NUM);
-                String found_comment  = mCursor.getString(TableMember.COLUMN_COMMENT_NUM);
-                State.IsBaptized found_baptized  = State.IntToBaptized(mCursor.getInt(TableMember.COLUMN_BAPTIZED_NUM));
-                State.IsDead found_dead  = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
+                String found_name = mCursor.getString(TableMember.COLUMN_NAME_NUM);
+                String found_comment = mCursor.getString(TableMember.COLUMN_COMMENT_NUM);
+                State.IsBaptized found_baptized = State.IntToBaptized(mCursor.getInt(TableMember.COLUMN_BAPTIZED_NUM));
+                State.IsDead found_dead = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
                 Member member = new Member(found_id, found_name, found_comment, found_baptized, found_dead);
                 member.load_groups();
                 member.load_worship();
@@ -147,43 +143,39 @@ public class Member implements EventGroup {
             } else {
                 return null;
             }
-        } finally {
-            mCursor.close();
         }
     }
     // Находятся все люди в базе
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static ArrayList<Member> FindAll()
     {
         SQLiteDatabase db = Connect.Item().get_db();
-        Cursor mCursor = db.query(TableMember.NAME, null, null, null, null, null, TableMember.COLUMN_NAME);
         ArrayList<Member> arrayList = new ArrayList<>();
 
-        try {
+        try (Cursor mCursor = db.query(TableMember.NAME, null, null, null, null, null, TableMember.COLUMN_NAME)) {
             mCursor.moveToFirst();
-            if (!mCursor.isAfterLast()){
-                do{
+            if (!mCursor.isAfterLast()) {
+                do {
                     long found_id = mCursor.getLong(TableMember.COLUMN_ID_NUM);
-                    String found_name  = mCursor.getString(TableMember.COLUMN_NAME_NUM);
-                    String found_comment  = mCursor.getString(TableMember.COLUMN_COMMENT_NUM);
-                    State.IsBaptized found_baptized  = State.IntToBaptized(mCursor.getInt(TableMember.COLUMN_BAPTIZED_NUM));
-                    State.IsDead found_dead  = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
+                    String found_name = mCursor.getString(TableMember.COLUMN_NAME_NUM);
+                    String found_comment = mCursor.getString(TableMember.COLUMN_COMMENT_NUM);
+                    State.IsBaptized found_baptized = State.IntToBaptized(mCursor.getInt(TableMember.COLUMN_BAPTIZED_NUM));
+                    State.IsDead found_dead = State.IntToDead(mCursor.getInt(TableMember.COLUMN_IS_DEAD_NUM));
                     Member member = new Member(found_id, found_name, found_comment, found_baptized, found_dead);
                     member.load_groups();
                     member.load_worship();
                     arrayList.add(member);
                 } while (mCursor.moveToNext());
             }
-        } finally {
-            mCursor.close();
         }
         return arrayList;
 
     }
 
     // Человек сохраняется или его данные обновляются в базе данных
-    public long SaveOrUpdate() throws WorshipErrors{
+    public void SaveOrUpdate() throws WorshipErrors{
         if (_name == null) {
-            throw WorshipErrors.Item(1002, null);
+            throw WorshipErrors.Item(1002);
         }
 
         SQLiteDatabase db = Connect.Item().get_db();
@@ -196,17 +188,13 @@ public class Member implements EventGroup {
         db.beginTransaction();
         try {
 
-            try {
-                if (_id == WorshipConst.EMPTY_ID) {
-                    _id = db.insertOrThrow(TableMember.NAME, null, cv);
-                    BusGroup.Item().AddToBus(this);
-                }
-                else {
-                    TableMember.Update(_id, _name, _comment, State.BaptizedToInt(_isBaptized), State.DeadToInt(_isIsDead), db);
-                    BusMember.Item().EventUpdateMember(this);
-                }
-            } catch (SQLException e) {
-                throw e;
+            if (_id == WorshipConst.EMPTY_ID) {
+                _id = db.insertOrThrow(TableMember.NAME, null, cv);
+                BusGroup.Item().AddToBus(this);
+            }
+            else {
+                TableMember.Update(_id, _name, _comment, State.BaptizedToInt(_isBaptized), State.DeadToInt(_isIsDead), db);
+                BusMember.Item().EventUpdateMember(this);
             }
 
             if (_mapOfGroup.size() > 0){
@@ -227,8 +215,6 @@ public class Member implements EventGroup {
         } finally {
             db.endTransaction();
         }
-
-        return _id;
     }
 
     // Добавление человека в группу
@@ -248,11 +234,6 @@ public class Member implements EventGroup {
         _listOfWorship.remove(worship);
     }
 
-    // region Implements EventGroup
-    @Override
-    public void OnAddedGroup(Group group) {
-
-    }
     @Override
     public void OnUpdatedGroup(Group group) {
         Group g =_mapOfGroup.get(group.get_id());
@@ -292,14 +273,12 @@ public class Member implements EventGroup {
             String sql = String.format("delete from %1$s where %2$s = %3$s", NAME, COLUMN_ID, member.get_id());
             db.execSQL(sql);
         }
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public static int CountOfRows(){
             SQLiteDatabase db = Connect.Item().get_db();
-            Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
 
-            try {
+            try (Cursor mCursor = db.query(NAME, null, null, null, null, null, null)) {
                 return mCursor.getCount();
-            } finally {
-                mCursor.close();
             }
         }
 
@@ -312,8 +291,8 @@ public class Member implements EventGroup {
         private static final String COLUMN_ID_GROUP = "id_groups";
 
         // Номера столбцов
-        private static final int COLUMN_ID_MEMBER_NUM = 0;
-        private static final int COLUMN_ID_GROUP_NUM = 1;
+/*        private static final int COLUMN_ID_MEMBER_NUM = 0;
+        private static final int COLUMN_ID_GROUP_NUM = 1;*/
 
         // Удаляются все записи связанные с конкретным пользователем
         public static void DeleteByMember(long idMember, SQLiteDatabase db){
@@ -337,11 +316,11 @@ public class Member implements EventGroup {
         }
 
         // Выбирается список групп ассоциированных с пользователем
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public static LongSparseArray<Group> LoadGroupOfMember(long _id, SQLiteDatabase db){
             LongSparseArray<Group> mapList = new LongSparseArray<>();
-            String sql = String.format("select g.* from members_groups mg left join groups g on mg.id_groups = g._id where mg.id_members = %1$d", _id);
-            Cursor mCursor = db.rawQuery(sql, new String [] {});
-            try {
+            String sql = String.format(Locale.US, "select g.* from members_groups mg left join groups g on mg.id_groups = g._id where mg.id_members = %1$d", _id);
+            try (Cursor mCursor = db.rawQuery(sql, new String[]{})) {
                 mCursor.moveToFirst();
                 if (!mCursor.isAfterLast()) {
                     do {
@@ -350,18 +329,16 @@ public class Member implements EventGroup {
                         mapList.put(id, new Group(id, name));
                     } while (mCursor.moveToNext());
                 }
-            } finally {
-                mCursor.close();
             }
             return mapList;
         }
 
         // Выбирается список молитвословий ассоциированных с пользователем
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public static ArrayList<Worship> LoadWorshipOfMember(long _id, SQLiteDatabase db){
             ArrayList<Worship> arrayList = new ArrayList<>();
-            String sql = String.format("select w.* from worships_members wm left join worships w on wm.id_worship = w._id where wm.id_member = %1$d", _id);
-            Cursor mCursor = db.rawQuery(sql, new String [] {});
-            try {
+            String sql = String.format(Locale.US, "select w.* from worships_members wm left join worships w on wm.id_worship = w._id where wm.id_member = %1$d", _id);
+            try (Cursor mCursor = db.rawQuery(sql, new String[]{})) {
                 mCursor.moveToFirst();
                 if (!mCursor.isAfterLast()) {
                     do {
@@ -370,20 +347,16 @@ public class Member implements EventGroup {
                         arrayList.add(new Worship(id, name));
                     } while (mCursor.moveToNext());
                 }
-            } finally {
-                mCursor.close();
             }
             return arrayList;
         }
 
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public static int CountOfRows() {
             SQLiteDatabase db = Connect.Item().get_db();
-            Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
 
-            try {
+            try (Cursor mCursor = db.query(NAME, null, null, null, null, null, null)) {
                 return mCursor.getCount();
-            } finally {
-                mCursor.close();
             }
         }
     }

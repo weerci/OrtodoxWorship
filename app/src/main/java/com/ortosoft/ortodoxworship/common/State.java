@@ -1,7 +1,9 @@
 package com.ortosoft.ortodoxworship.common;
 
 /**
- * Created by admin on 16.05.2016.
+ * Created by admin on 16.05.2016 at 03: 04.
+ * Класс состояния пользователя (крещение, жизнь)
+ * Предоставляет перевод из перечисления в соответствующий int для сохранения в базе
  */
 public class State {
     public enum IsBaptized {unknown, yes, no}

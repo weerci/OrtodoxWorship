@@ -1,14 +1,13 @@
 package com.ortosoft.ortodoxworship.db;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Build;
 import android.util.Log;
 
 import com.ortosoft.ortodoxworship.App;
-import com.ortosoft.ortodoxworship.R;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -17,15 +16,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 
 /**
- * Created by admin on 11.05.2016.
+ * Created by admin on 11.05.2016 at 03: 04.
+ * Работа с базой данных
  */
 public class SQLiteWorship extends SQLiteOpenHelper {
 
     //region static fields
     private static final String DB_NAME = "remember.db";
+    @SuppressLint("SdCardPath")
     private static final String DB_FOLDER = "/data/data/"+ App.getInstance().getPackageName() + "/databases/";
     public static final String DB_PATH = DB_FOLDER + DB_NAME;
     private static final String DB_ASSETS_PATH = "db/" + DB_NAME;
@@ -39,7 +39,7 @@ public class SQLiteWorship extends SQLiteOpenHelper {
     private static boolean _versionIsCorrect = false;
 
     // endregion
-    public static void Initialize() throws IOException, ClassNotFoundException {
+    public static void Initialize() throws IOException {
         checkDb();
         if (!_dbExist){
             copyDbFromAssets();
@@ -53,6 +53,7 @@ public class SQLiteWorship extends SQLiteOpenHelper {
         }
     }
 
+    @SuppressWarnings("unused")
     public SQLiteWorship() {
         super(App.getContext(), DB_NAME, null, DB_VERSION);
     }
@@ -65,7 +66,7 @@ public class SQLiteWorship extends SQLiteOpenHelper {
         try {
             inStream = new BufferedInputStream(appContext.getAssets().open(DB_ASSETS_PATH), DB_FILES_COPY_BUFFER_SIZE);
             File dbDir = new File(DB_FOLDER);
-            if (dbDir.exists() == false && dbDir.mkdir()) {
+            if (!dbDir.exists() && dbDir.mkdir()) {
                 outStream = new BufferedOutputStream(new FileOutputStream(DB_PATH),
                         DB_FILES_COPY_BUFFER_SIZE);
 

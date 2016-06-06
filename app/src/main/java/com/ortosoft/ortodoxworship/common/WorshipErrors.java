@@ -5,25 +5,26 @@ import com.ortosoft.ortodoxworship.R;
 import android.support.v4.util.LongSparseArray;
 
 /**
- * Created by admin on 13.05.2016.
+ * Created by admin on 13.05.2016 at 03: 04.
+ * Реализация обработки ошибок
  */
 public class WorshipErrors extends Exception {
-    private long _id;
-    private String _desc;
-    private Throwable _throwable;
+    private final long _id;
+/*    private final String _desc;
+    private final Throwable _throwable;*/
 
-    protected WorshipErrors(long id, Throwable throwable){
-        super(WorshipErrors.get(id), throwable);
+    private WorshipErrors(long id){
+        super(WorshipErrors.get(id), null);
 
         _id = id;
-        _desc = WorshipErrors.get(id);
-        _throwable = throwable;
+/*        _desc = WorshipErrors.get(id);
+        _throwable = null;*/
     }
 
     // Создает экземпляр исключения
-    public static WorshipErrors Item(long id, Throwable throwable)
+    public static WorshipErrors Item(long id)
     {
-        return new WorshipErrors(id, throwable);
+        return new WorshipErrors(id);
     }
 
     // Возвращает номер исключения из WorshipErrors
@@ -31,18 +32,22 @@ public class WorshipErrors extends Exception {
         return _id;
     }
 
-    // Возвращает описание ошибки
-    public String get_desc(){
-        return _desc;
-    }
+// --Commented out by Inspection START (07.06.2016 2:26):
+//    // Возвращает описание ошибки
+//    public String get_desc(){
+//        return _desc;
+//    }
+// --Commented out by Inspection STOP (07.06.2016 2:26)
 
-    // Возвращает внутреннее исключение
-    public Throwable get_throwable() { return _throwable; }
+// --Commented out by Inspection START (07.06.2016 2:25):
+//    // Возвращает внутреннее исключение
+//    public Throwable get_throwable() { return _throwable; }
+// --Commented out by Inspection STOP (07.06.2016 2:25)
 
     // Список ошибок возможных в программе
-    public static final LongSparseArray<String> WorshipErrors;
+    private static final LongSparseArray<String> WorshipErrors;
     static{
-        WorshipErrors = new LongSparseArray<String>();
+        WorshipErrors = new LongSparseArray<>();
         WorshipErrors.put(1000, App.getContext().getString(R.string.error_group_name));
         WorshipErrors.put(1001, App.getContext().getString(R.string.error_unique_group_name));
         WorshipErrors.put(1002, App.getContext().getString(R.string.error_unique_group_name));

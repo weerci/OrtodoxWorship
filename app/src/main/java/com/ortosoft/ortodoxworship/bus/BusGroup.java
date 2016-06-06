@@ -7,11 +7,12 @@ import com.ortosoft.ortodoxworship.Model.Member;
 
 
 /**
- * Created by dima on 24.05.2016.
+ * Created by ${USER} on ${DATE} at 03 at 03: 05.
+ * Шина событий для групп, сообщает пользователям member об изменении и удалении группы
  */
 public class BusGroup  {
 
-    private LongSparseArray<Member> _memberList = new LongSparseArray<>();
+    private final LongSparseArray<Member> _memberList = new LongSparseArray<>();
     public LongSparseArray<Member> get_memberList() {
         return _memberList;
     }

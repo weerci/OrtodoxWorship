@@ -7,14 +7,14 @@ import com.ortosoft.ortodoxworship.Model.Member;
 
 
 /**
- * Created by dima on 05.06.2016.
+ * Created by dima on 05.06.2016 at 03 at 03: 03 at 03: 05.
+ * Шина событий для member сообщает группам, что пользователь изменил свое значение
+ * или был удален
  */
 public class BusMember {
 
-    private LongSparseArray<Group> _groupMap = new LongSparseArray<>();
-    public LongSparseArray<Group> get_groupMap() {
-        return _groupMap;
-    }
+    private final LongSparseArray<Group> _groupMap = new LongSparseArray<>();
+
 
     private static BusMember _busMember;
 

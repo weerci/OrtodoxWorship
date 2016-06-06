@@ -2,5 +2,4 @@
 <resources>
     <string name="error_group_name">The group name is not assigned</string>
     <string name="error_unique_group_name">The group name mast be unique</string>
-    <string name="error_member_name">The member name is not assigned</string>
 </resources>

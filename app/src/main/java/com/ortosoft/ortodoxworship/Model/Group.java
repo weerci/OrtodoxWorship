@@ -1,9 +1,11 @@
 package com.ortosoft.ortodoxworship.Model;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.support.v4.util.LongSparseArray;
 
 import com.ortosoft.ortodoxworship.bus.BusGroup;
@@ -15,6 +17,7 @@ import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.Connect;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by admin on 11.05.2016.
@@ -69,9 +72,9 @@ public class Group implements EventMember {
     }
 
     // Группа сохраняется в базе данных
-    public long SaveOrUpdate() throws WorshipErrors {
+    public void SaveOrUpdate() throws WorshipErrors {
         if (_name == null) {
-            throw WorshipErrors.Item(1000, null);
+            throw WorshipErrors.Item(1000);
         }
 
         SQLiteDatabase db = Connect.Item().get_db();
@@ -98,26 +101,20 @@ public class Group implements EventMember {
 
         } catch (SQLException e) {
             if (TableGroup.CheckUnique(e.getMessage()))
-                throw WorshipErrors.Item(1001, null);
+                throw WorshipErrors.Item(1001);
             else
                 throw e;
         }
-
-        return _id;
     }
     // Удаляется выбранная группа
-    public static void Delete(Group group) throws WorshipErrors {
+    public static void Delete(Group group) {
         SQLiteDatabase db = Connect.Item().get_db();
-        try {
-            TableGroup.Delete(group, db);
-            BusGroup.Item().EventDeleteGroup(group);
-            BusMember.Item().RemoveFromBus(group);
-        } catch (Exception e) {
-            throw e;
-        }
+        TableGroup.Delete(group, db);
+        BusGroup.Item().EventDeleteGroup(group);
+        BusMember.Item().RemoveFromBus(group);
     }
     // Удвляется список групп
-    public static void Delete(Group[] groups) throws WorshipErrors {
+    public static void Delete(Group[] groups) {
         SQLiteDatabase db = Connect.Item().get_db();
 
         db.beginTransaction();
@@ -128,25 +125,22 @@ public class Group implements EventMember {
                 BusMember.Item().RemoveFromBus(g);
             }
             db.setTransactionSuccessful();
-        } catch (Exception e) {
-            throw e;
-        }
-        finally {
+        } finally {
             db.endTransaction();
         }
     }
 
     // Находится группа по переданному имени
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static Group FindByName(String name) {
         SQLiteDatabase db = Connect.Item().get_db();
-        Cursor mCursor = db.query(TableGroup.NAME, null, TableGroup.COLUMN_NAME + " = ?", new String[] { name }, null, null, null);
 
-        try {
+        try (Cursor mCursor = db.query(TableGroup.NAME, null, TableGroup.COLUMN_NAME + " = ?", new String[]{name}, null, null, null)) {
             mCursor.moveToFirst();
-            if (!mCursor.isAfterLast()){
+            if (!mCursor.isAfterLast()) {
                 long found_id = mCursor.getLong(TableGroup.COLUMN_ID_NUM);
-                String found_name  = mCursor.getString(TableGroup.COLUMN_NAME_NUM);
-                Group group =  new Group(found_id, found_name);
+                String found_name = mCursor.getString(TableGroup.COLUMN_NAME_NUM);
+                Group group = new Group(found_id, found_name);
                 try {
                     group.load_members();
                 } catch (Exception e) {
@@ -156,29 +150,25 @@ public class Group implements EventMember {
             } else {
                 return null;
             }
-        } finally {
-            mCursor.close();
         }
     }
     // Получение всех групп
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static ArrayList<Group> FindAll() {
         SQLiteDatabase db = Connect.Item().get_db();
-        Cursor mCursor = db.query(TableGroup.NAME, null, null, null, null, null, TableGroup.COLUMN_NAME);
         ArrayList<Group> arrayList = new ArrayList<>();
 
-        try {
+        try (Cursor mCursor = db.query(TableGroup.NAME, null, null, null, null, null, TableGroup.COLUMN_NAME)) {
             mCursor.moveToFirst();
-            if (!mCursor.isAfterLast()){
-                do{
-                long found_id = mCursor.getLong(TableGroup.COLUMN_ID_NUM);
-                String found_name  = mCursor.getString(TableGroup.COLUMN_NAME_NUM);
-                Group group = new Group(found_id, found_name);
-                group.load_members();
-                arrayList.add(group);
+            if (!mCursor.isAfterLast()) {
+                do {
+                    long found_id = mCursor.getLong(TableGroup.COLUMN_ID_NUM);
+                    String found_name = mCursor.getString(TableGroup.COLUMN_NAME_NUM);
+                    Group group = new Group(found_id, found_name);
+                    group.load_members();
+                    arrayList.add(group);
                 } while (mCursor.moveToNext());
             }
-        } finally {
-            mCursor.close();
         }
         return arrayList;
     }
@@ -190,8 +180,7 @@ public class Group implements EventMember {
 
         Group group = (Group) o;
 
-        if (_id != group._id) return false;
-        return _name.equals(group._name);
+        return _id == group._id && _name.equals(group._name);
     }
     @Override
     public int hashCode() {
@@ -239,11 +228,11 @@ public class Group implements EventMember {
         private static boolean CheckUnique(String msg){
             return msg.startsWith("UNIQUE constraint");
         }
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public static LongSparseArray<Member> LoadMembersOfGroup(long _id, SQLiteDatabase db){
             LongSparseArray<Member> sparseArray = new LongSparseArray<>();
-            String sql = String.format("select m.* from members_groups mg left join members m on mg.id_members = m._id where mg.id_groups = %1$d", _id);
-            Cursor mCursor = db.rawQuery(sql, new String [] {});
-            try {
+            String sql = String.format(Locale.US, "select m.* from members_groups mg left join members m on mg.id_members = m._id where mg.id_groups = %1$d", _id);
+            try (Cursor mCursor = db.rawQuery(sql, new String[]{})) {
                 mCursor.moveToFirst();
                 if (!mCursor.isAfterLast()) {
                     do {
@@ -255,19 +244,15 @@ public class Group implements EventMember {
                         sparseArray.put(id, new Member(id, name, comment, isBaptized, isDead));
                     } while (mCursor.moveToNext());
                 }
-            } finally {
-                mCursor.close();
             }
             return sparseArray;
         }
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public static int CountOfRows(){
             SQLiteDatabase db = Connect.Item().get_db();
-            Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
 
-            try {
+            try (Cursor mCursor = db.query(NAME, null, null, null, null, null, null)) {
                 return mCursor.getCount();
-            } finally {
-                mCursor.close();
             }
         }
     }

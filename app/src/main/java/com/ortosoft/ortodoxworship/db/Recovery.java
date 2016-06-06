@@ -1,50 +1,48 @@
 package com.ortosoft.ortodoxworship.db;
 
-import android.content.Context;
+import android.annotation.TargetApi;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 
-import com.ortosoft.ortodoxworship.App;
 import com.ortosoft.ortodoxworship.Model.Group;
 import com.ortosoft.ortodoxworship.Model.Member;
 import com.ortosoft.ortodoxworship.Model.Worship;
 import com.ortosoft.ortodoxworship.common.Pair;
 import com.ortosoft.ortodoxworship.common.State;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
- * Created by admin on 17.05.2016.
+ * Created by admin on 17.05.2016 at 03: 04.
+ * Восстановление базы данных пользователей при обновлении программы
  */
-public class Recovery {
+class Recovery {
 
     // region Fields
 
-    private final String SERIALIZE_RECOVERY_FILE = "recovery.out";
+    // --Commented out by Inspection (07.06.2016 2:43):private final String SERIALIZE_RECOVERY_FILE = "recovery.out";
 
     private ArrayList<Member> _members;
     private ArrayList<Group> _groups;
     private ArrayList<Pair> _members_groups;
     private ArrayList<Pair> _worships_members;
 
-    public ArrayList<Member> get_members() {
-        return _members;
-    }
-    public ArrayList<Group> get_groups() {
+// --Commented out by Inspection START (07.06.2016 2:43):
+//    private ArrayList<Member> get_members() {
+//        return _members;
+//    }
+// --Commented out by Inspection STOP (07.06.2016 2:43)
+/*    private ArrayList<Group> get_groups() {
         return _groups;
     }
-    public ArrayList<Pair> get_members_groups() {
+    private ArrayList<Pair> get_members_groups() {
         return _members_groups;
     }
-    public ArrayList<Pair> get_worships_members() {
+    private ArrayList<Pair> get_worships_members() {
         return _worships_members;
-    }
+    }*/
 
     // endregion
 
@@ -92,7 +90,7 @@ public class Recovery {
     }
 
     // Сохраняет данные в файлах
-    public void SaveToFile() throws IOException {
+    /*public void SaveToFile() throws IOException {
         OutputStream fos = App.getContext().openFileOutput(SERIALIZE_RECOVERY_FILE, Context.MODE_PRIVATE);
 
         ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -102,7 +100,7 @@ public class Recovery {
         } finally {
             oos.close();
         }
-    }
+    }*/
 
     // Сохраняет данные базы в поля класса
     public void LoadFromBase() {
@@ -111,9 +109,8 @@ public class Recovery {
         _members_groups = FindAll(Member.TableMembersGroups.NAME);
         _worships_members = FindAll(Worship.TableWorshipsMembers.NAME);
     }
-
+/*
     public  void LoadFromFiles() throws IOException, ClassNotFoundException {
-        File file = new File(SERIALIZE_RECOVERY_FILE);
         FileInputStream fis = new FileInputStream(SERIALIZE_RECOVERY_FILE);
         ObjectInputStream oin = new ObjectInputStream(fis);
         Recovery rec = (Recovery) oin.readObject();
@@ -122,7 +119,7 @@ public class Recovery {
         this._groups = rec.get_groups();
         this._members_groups = rec.get_members_groups();
         this._worships_members = rec.get_worships_members();
-    }
+    }*/
 
     // region Helper
 
@@ -134,7 +131,7 @@ public class Recovery {
         sb.append("INSERT INTO members (_id, name, comment, is_dead, baptized) VALUES ");
 
         for (Member m : _members)
-            sb.append(String.format("(%d, '%s', '%s', %d, %d),", m.get_id(), m.get_name(), m.get_comment(),
+            sb.append(String.format(Locale.US, "(%d, '%s', '%s', %d, %d),", m.get_id(), m.get_name(), m.get_comment(),
                     State.DeadToInt(m.get_isIsDead()), State.BaptizedToInt(m.get_isBaptized())));
         sb.deleteCharAt(sb.length() - 1);
 
@@ -149,7 +146,7 @@ public class Recovery {
         sb.append("INSERT INTO groups (_id, name) VALUES ");
 
         for (Group g : _groups)
-            sb.append(String.format("(%d, '%s'),", g.get_id(), g.get_name()));
+            sb.append(String.format(Locale.US, "(%d, '%s'),", g.get_id(), g.get_name()));
 
         sb.deleteCharAt(sb.length() - 1);
 
@@ -164,7 +161,7 @@ public class Recovery {
         sb.append("INSERT INTO members_groups (id_members, id_groups) VALUES ");
 
         for (Pair p : _members_groups)
-            sb.append(String.format("(%d, %d),", p.get_id1(), p.get_id2()));
+            sb.append(String.format(Locale.US, "(%d, %d),", p.get_id1(), p.get_id2()));
 
         sb.deleteCharAt(sb.length() - 1);
 
@@ -179,17 +176,17 @@ public class Recovery {
         sb.append("INSERT INTO worships_members (id_worship, id_member) VALUES ");
 
         for (Pair p : _worships_members)
-            sb.append(String.format("(%d, %d),", p.get_id1(), p.get_id2()));
+            sb.append(String.format(Locale.US, "(%d, %d),", p.get_id1(), p.get_id2()));
         sb.deleteCharAt(sb.length() - 1);
 
         return sb.toString();
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     private ArrayList<Pair> FindAll(String tableName) {
-        Cursor mCursor = Connect.Item().get_db().query(tableName, null, null, null, null, null, null);
         ArrayList<Pair> arr = new ArrayList<>();
 
-        try {
+        try (Cursor mCursor = Connect.Item().get_db().query(tableName, null, null, null, null, null, null)) {
             mCursor.moveToFirst();
             if (!mCursor.isAfterLast()) {
                 do {
@@ -198,8 +195,6 @@ public class Recovery {
                     arr.add(new Pair(id1, id2));
                 } while (mCursor.moveToNext());
             }
-        } finally {
-            mCursor.close();
         }
         return arr;
     }
