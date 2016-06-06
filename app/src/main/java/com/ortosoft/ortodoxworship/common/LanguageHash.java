@@ -17,15 +17,12 @@ public class LanguageHash {
     }
 
     private HashMap<Worship.Language, HashMap<Long, Prayer>> _prayersHash = new HashMap();
-    public HashMap<Worship.Language, Prayer> Prayers(Worship.Language language){
-        if (loadPrayers(language)) {
-            return _prayersHash.get()
-        };
-        return null;
+    public HashMap<Long, Prayer> Prayers(Worship.Language language){
+        return loadPrayers(language);
     }
 
     //region Helper
-    private boolean loadPrayers(Worship.Language language){
+    private HashMap<Long, Prayer> loadPrayers(Worship.Language language){
         switch (language){
             case cks:
                 return load_cks(_id);
@@ -40,24 +37,24 @@ public class LanguageHash {
         }
     }
 
-    private boolean load_cks(long id){
-        return false;
+    private HashMap<Long, Prayer> load_cks(long id){
+        return null;
     }
 
-    private boolean load_eng(long id){
-        return false;
+    private HashMap<Long, Prayer> load_eng(long id){
+        return null;
     }
 
-    private boolean load_greek(long id){
-        return false;
+    private HashMap<Long, Prayer> load_greek(long id){
+        return null;
     }
 
-    private boolean load_latin(long id){
-        return false;
+    private HashMap<Long, Prayer> load_latin(long id){
+        return null;
     }
 
-    private boolean load_rus(long id){
-        return false;
+    private HashMap<Long, Prayer> load_rus(long id){
+        return null;
     }
     //endregion
 
