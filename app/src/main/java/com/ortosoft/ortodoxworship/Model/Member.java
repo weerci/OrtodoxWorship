@@ -375,8 +375,7 @@ public class Member implements EventGroup {
             return arrayList;
         }
 
-        public static int CountOfRows()
-        {
+        public static int CountOfRows() {
             SQLiteDatabase db = Connect.Item().get_db();
             Cursor mCursor = db.query(NAME, null, null, null, null, null, null);
 
