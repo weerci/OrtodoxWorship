@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.ortosoft.ortodoxworship.common.LanguageHash;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.db.Connect;
 
@@ -15,11 +16,6 @@ import java.util.HashMap;
  * Created by dima on 16.05.2016.
  */
 public class Worship {
-
-    public Worship(long id, String name) {
-        _id = id;
-        _name = name;
-    }
 
     private long _id = WorshipConst.EMPTY_ID;
     public long get_id() {
@@ -34,10 +30,20 @@ public class Worship {
         this._name = _name;
     }
 
+    private HashMap<Long, Prayer> _prayers = new HashMap<>();
+    public HashMap<Long, Prayer> get_prayers(Language language) {
+        return LanguageHash.Prayers(_id, language);
+    }
+
+    public Worship(long id, String name) {
+        _id = id;
+        _name = name;
+    }
+
     // Находит молитвословие по его имени
-    public static Worship FindByName(String name)
-    {
+    public static Worship FindByName(String name){
         SQLiteDatabase db = Connect.Item().get_db();
+        // TODO: переделать с использованием параметров
         Cursor mCursor = db.query(TableWorship.NAME, null, TableWorship.COLUMN_NAME + " = ?", new String[] { name }, null, null, null);
 
         try {
@@ -54,7 +60,7 @@ public class Worship {
         }
     }
 
-    public enum Language { latin, greek, rus, eng }
+    public enum Language { latin, greek, rus, eng, cks }
 
     public static class TableWorship {
         // Название таблицы
