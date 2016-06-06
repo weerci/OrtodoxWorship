@@ -2,12 +2,8 @@ package com.ortosoft.ortodoxworship.Model;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.util.LongSparseArray;
 
-import com.ortosoft.ortodoxworship.App;
-import com.ortosoft.ortodoxworship.Model.Group;
-import com.ortosoft.ortodoxworship.Model.Prayer;
-import com.ortosoft.ortodoxworship.Model.Worship;
-import com.ortosoft.ortodoxworship.R;
 import com.ortosoft.ortodoxworship.db.Connect;
 
 import java.util.HashMap;
@@ -23,18 +19,20 @@ public class LanguageHash {
         this._id = _id;
     }
 
-    private HashMap<Worship.Language, HashMap<Long, Prayer>> _prayersHash = new HashMap();
-    public HashMap<Long, Prayer> Prayers(Worship.Language language){
-        HashMap<Long, Prayer> prayers = _prayersHash.get(language);
+    private HashMap<Worship.Language, LongSparseArray<Prayer>> _prayersHash = new HashMap();
+
+    public LongSparseArray<Prayer> Prayers(Worship.Language language){
+        LongSparseArray<Prayer> prayers = _prayersHash.get(language);
         if (prayers == null){
-            _prayersHash.put(language, selectPrayersByLanguage(_id, language));
+            _prayersHash.put(language, selectPrayersByLanguage(language));
             prayers = _prayersHash.get(language);
         }
         return prayers;
     }
 
-    private HashMap<Long, Prayer> selectPrayersByLanguage(long id, Worship.Language language){
-        HashMap<Long, Prayer> prayersMap = new HashMap<>();
+
+    private LongSparseArray<Prayer> selectPrayersByLanguage(Worship.Language language){
+        LongSparseArray<Prayer> prayersMap = new LongSparseArray<>();
 
         SQLiteDatabase db = Connect.Item().get_db();
         String sql = String.format(QueryWorship.NAME, language.toString(), _id);

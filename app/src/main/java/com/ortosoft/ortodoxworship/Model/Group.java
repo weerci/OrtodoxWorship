@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.util.LongSparseArray;
 
 import com.ortosoft.ortodoxworship.bus.BusGroup;
 import com.ortosoft.ortodoxworship.bus.BusMember;
@@ -14,7 +15,6 @@ import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.Connect;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by admin on 11.05.2016.
@@ -50,8 +50,8 @@ public class Group implements EventMember {
         _name = name;
     }
 
-    private HashMap<Long, Member> _members = new HashMap<>();
-    public HashMap<Long, Member> get_members() {
+    private LongSparseArray<Member> _members = new LongSparseArray<>();
+    public LongSparseArray<Member> get_members() {
         return _members;
     }
 
@@ -90,8 +90,10 @@ public class Group implements EventMember {
 
             if (_members.size() > 0){
                 Member.TableMembersGroups.DeleteByGroup (_id, db);
-                for (Member m: _members.values())
-                    Member.TableMembersGroups.Insert(m.get_id(), _id, db);
+                for (int i = 0; i < _members.size(); i++) {
+                    Member.TableMembersGroups.Insert(_members.valueAt(i).get_id(), _id, db);
+                }
+
             }
 
         } catch (SQLException e) {
@@ -145,7 +147,11 @@ public class Group implements EventMember {
                 long found_id = mCursor.getLong(TableGroup.COLUMN_ID_NUM);
                 String found_name  = mCursor.getString(TableGroup.COLUMN_NAME_NUM);
                 Group group =  new Group(found_id, found_name);
-                group.load_members();
+                try {
+                    group.load_members();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return group;
             } else {
                 return null;
@@ -233,8 +239,8 @@ public class Group implements EventMember {
         private static boolean CheckUnique(String msg){
             return msg.startsWith("UNIQUE constraint");
         }
-        public static HashMap<Long, Member> LoadMembersOfGroup(long _id, SQLiteDatabase db){
-            HashMap<Long, Member> hashMap = new HashMap<>();
+        public static LongSparseArray<Member> LoadMembersOfGroup(long _id, SQLiteDatabase db){
+            LongSparseArray<Member> sparseArray = new LongSparseArray<>();
             String sql = String.format("select m.* from members_groups mg left join members m on mg.id_members = m._id where mg.id_groups = %1$d", _id);
             Cursor mCursor = db.rawQuery(sql, new String [] {});
             try {
@@ -246,13 +252,13 @@ public class Group implements EventMember {
                         String comment = mCursor.getString(Member.TableMember.COLUMN_COMMENT_NUM);
                         State.IsBaptized isBaptized = State.IntToBaptized(mCursor.getInt(Member.TableMember.COLUMN_BAPTIZED_NUM));
                         State.IsDead isDead = State.IntToDead(mCursor.getInt(Member.TableMember.COLUMN_IS_DEAD_NUM));
-                        hashMap.put(id, new Member(id, name, comment, isBaptized, isDead));
+                        sparseArray.put(id, new Member(id, name, comment, isBaptized, isDead));
                     } while (mCursor.moveToNext());
                 }
             } finally {
                 mCursor.close();
             }
-            return hashMap;
+            return sparseArray;
         }
         public static int CountOfRows(){
             SQLiteDatabase db = Connect.Item().get_db();

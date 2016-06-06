@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.util.LongSparseArray;
 
 import com.ortosoft.ortodoxworship.bus.BusGroup;
 import com.ortosoft.ortodoxworship.bus.BusMember;
@@ -12,10 +13,8 @@ import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.common.WorshipErrors;
 import com.ortosoft.ortodoxworship.db.Connect;
-import com.ortosoft.ortodoxworship.db.SQLiteWorship;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by admin on 16.05.2016.
@@ -57,8 +56,8 @@ public class Member implements EventGroup {
         this._isIsDead = _isIsDead;
     }
 
-    private HashMap<Long, Group> _mapOfGroup = new HashMap<>();
-    public HashMap<Long,Group> get_listOfGroup() {return _mapOfGroup; }
+    private LongSparseArray<Group> _mapOfGroup = new LongSparseArray<>();
+    public LongSparseArray<Group> get_listOfGroup() {return _mapOfGroup; }
 
     private ArrayList<Worship> _listOfWorship = new ArrayList<>();
     public ArrayList<Worship> get_listOfWorship() {
@@ -212,8 +211,10 @@ public class Member implements EventGroup {
 
             if (_mapOfGroup.size() > 0){
                 TableMembersGroups.DeleteByMember(_id, db);
-                for (Group g: _mapOfGroup.values())
-                    TableMembersGroups.Insert(_id, g.get_id(), db);
+                for (int i = 0; i < _mapOfGroup.size(); i++) {
+                    TableMembersGroups.Insert(_id, _mapOfGroup.valueAt(i).get_id(), db);
+                }
+
             }
 
             if (_listOfWorship.size() > 0) {
@@ -336,8 +337,8 @@ public class Member implements EventGroup {
         }
 
         // Выбирается список групп ассоциированных с пользователем
-        public static HashMap<Long, Group> LoadGroupOfMember(long _id, SQLiteDatabase db){
-            HashMap<Long, Group> mapList = new HashMap<>();
+        public static LongSparseArray<Group> LoadGroupOfMember(long _id, SQLiteDatabase db){
+            LongSparseArray<Group> mapList = new LongSparseArray<>();
             String sql = String.format("select g.* from members_groups mg left join groups g on mg.id_groups = g._id where mg.id_members = %1$d", _id);
             Cursor mCursor = db.rawQuery(sql, new String [] {});
             try {

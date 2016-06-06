@@ -2,6 +2,7 @@ package com.ortosoft.ortodoxworship;
 
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.util.LongSparseArray;
 import android.test.ApplicationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -11,16 +12,13 @@ import com.ortosoft.ortodoxworship.Model.Worship;
 import com.ortosoft.ortodoxworship.bus.BusGroup;
 import com.ortosoft.ortodoxworship.common.State;
 import com.ortosoft.ortodoxworship.db.Connect;
-import com.ortosoft.ortodoxworship.db.SQLiteWorship;
-
-import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by admin on 14.05.2016.
  */
+@SuppressWarnings("ConstantConditions")
 public class MemberTest extends ApplicationTestCase<Application> {
 
     public MemberTest() {
@@ -130,7 +128,7 @@ public class MemberTest extends ApplicationTestCase<Application> {
         member.SaveOrUpdate();
 
         Member find_member = Member.FindById(member.get_id());
-        HashMap<Long, Group> list_groups = find_member.get_listOfGroup();
+        LongSparseArray<Group> list_groups = find_member.get_listOfGroup();
 
         assertEquals(2, list_groups.size());
         assertEquals(list_groups.get(group.get_id()).get_name(), group.get_name());

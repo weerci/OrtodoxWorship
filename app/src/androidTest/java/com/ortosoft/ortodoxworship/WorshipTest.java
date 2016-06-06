@@ -1,6 +1,7 @@
 package com.ortosoft.ortodoxworship;
 
 import android.app.Application;
+import android.support.v4.util.LongSparseArray;
 import android.test.ApplicationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -12,6 +13,7 @@ import java.util.HashMap;
 /**
  * Created by dima on 16.05.2016.
  */
+@SuppressWarnings("ConstantConditions")
 public class WorshipTest extends ApplicationTestCase<Application> {
     public WorshipTest() {
         super(Application.class);
@@ -30,7 +32,7 @@ public class WorshipTest extends ApplicationTestCase<Application> {
         String worshipName = "morning";
         Worship worship = Worship.FindByName(worshipName);
 
-        HashMap<Long, Prayer> prayerHashMap = worship.get_prayers(Worship.Language.cks);
+        LongSparseArray<Prayer> prayerHashMap = worship.get_prayers(Worship.Language.cks);
         assertEquals(11, prayerHashMap.size());
 
         prayerHashMap = worship.get_prayers(Worship.Language.rus);

@@ -2,8 +2,7 @@ package com.ortosoft.ortodoxworship.common;
 
 import com.ortosoft.ortodoxworship.App;
 import com.ortosoft.ortodoxworship.R;
-
-import java.util.HashMap;
+import android.support.v4.util.LongSparseArray;
 
 /**
  * Created by admin on 13.05.2016.
@@ -27,7 +26,7 @@ public class WorshipErrors extends Exception {
         return new WorshipErrors(id, throwable);
     }
 
-    // Возвращает номер исключения из WorshiErrors
+    // Возвращает номер исключения из WorshipErrors
     public long get_id(){
         return _id;
     }
@@ -41,13 +40,12 @@ public class WorshipErrors extends Exception {
     public Throwable get_throwable() { return _throwable; }
 
     // Список ошибок возможных в программе
-    public static final HashMap<Long, String> WorshipErrors;
-    static
-    {
-        WorshipErrors = new HashMap<Long, String>();
-        WorshipErrors.put(new Long(1000), App.getContext().getString(R.string.error_group_name));
-        WorshipErrors.put(new Long(1001), App.getContext().getString(R.string.error_unique_group_name));
-        WorshipErrors.put(new Long(1002), App.getContext().getString(R.string.error_unique_group_name));
+    public static final LongSparseArray<String> WorshipErrors;
+    static{
+        WorshipErrors = new LongSparseArray<String>();
+        WorshipErrors.put(1000, App.getContext().getString(R.string.error_group_name));
+        WorshipErrors.put(1001, App.getContext().getString(R.string.error_unique_group_name));
+        WorshipErrors.put(1002, App.getContext().getString(R.string.error_unique_group_name));
     }
 
 }

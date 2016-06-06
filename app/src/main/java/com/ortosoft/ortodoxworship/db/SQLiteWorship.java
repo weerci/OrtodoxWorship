@@ -40,12 +40,10 @@ public class SQLiteWorship extends SQLiteOpenHelper {
 
     // endregion
     public static void Initialize() throws IOException, ClassNotFoundException {
-        Recovery rec = new Recovery();
-
         checkDb();
         if (!_dbExist){
             copyDbFromAssets();
-        } else if(_dbExist && !_versionIsCorrect)
+        } else if(!_versionIsCorrect)
         {
             Log.d("Start recovery", "Start recovery");
             Recovery recovery = new Recovery();
@@ -67,15 +65,15 @@ public class SQLiteWorship extends SQLiteOpenHelper {
         try {
             inStream = new BufferedInputStream(appContext.getAssets().open(DB_ASSETS_PATH), DB_FILES_COPY_BUFFER_SIZE);
             File dbDir = new File(DB_FOLDER);
-            if (dbDir.exists() == false)
-                dbDir.mkdir();
-            outStream = new BufferedOutputStream(new FileOutputStream(DB_PATH),
-                    DB_FILES_COPY_BUFFER_SIZE);
+            if (dbDir.exists() == false && dbDir.mkdir()) {
+                outStream = new BufferedOutputStream(new FileOutputStream(DB_PATH),
+                        DB_FILES_COPY_BUFFER_SIZE);
 
-            byte[] buffer = new byte[DB_FILES_COPY_BUFFER_SIZE];
-            int length;
-            while ((length = inStream.read(buffer)) > 0) {
-                outStream.write(buffer, 0, length);
+                byte[] buffer = new byte[DB_FILES_COPY_BUFFER_SIZE];
+                int length;
+                while ((length = inStream.read(buffer)) > 0) {
+                    outStream.write(buffer, 0, length);
+                }
             }
         }
         catch (Exception e)
@@ -83,9 +81,13 @@ public class SQLiteWorship extends SQLiteOpenHelper {
             Log.d("copy", "что то пошло не так");
         }
         finally {
-            outStream.flush();
-            outStream.close();
-            inStream.close();
+            if (outStream != null) {
+                outStream.flush();
+                outStream.close();
+            }
+            if (inStream != null) {
+              inStream.close();
+            }
         }
     }
     private static void checkDb() {

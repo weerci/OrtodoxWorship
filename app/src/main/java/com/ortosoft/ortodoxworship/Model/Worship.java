@@ -3,11 +3,11 @@ package com.ortosoft.ortodoxworship.Model;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.util.LongSparseArray;
 
 import com.ortosoft.ortodoxworship.common.WorshipConst;
 import com.ortosoft.ortodoxworship.db.Connect;
 
-import java.util.HashMap;
 
 /**
  * Created by dima on 16.05.2016.
@@ -26,8 +26,8 @@ public class Worship {
         return _name;
     }
 
-    private HashMap<Long, Prayer> _prayers = new HashMap<>();
-    public HashMap<Long, Prayer> get_prayers(Language language) {
+    private LongSparseArray<Prayer> _prayers = new LongSparseArray<>();
+    public LongSparseArray<Prayer> get_prayers(Language language) {
         return _laLanguageHash.Prayers(language);
     }
 

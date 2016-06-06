@@ -15,6 +15,7 @@ import com.ortosoft.ortodoxworship.db.Connect;
 /**
  * Created by dima on 24.05.2016.
  */
+@SuppressWarnings("ConstantConditions")
 public class BusTest extends ApplicationTestCase<Application> {
 
     public BusTest() {

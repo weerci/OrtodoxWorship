@@ -63,22 +63,22 @@ public class Recovery {
         try {
 
             String scriptForMembers = scriptForMembers();
-            if (!scriptForMembers.isEmpty()) {
+            if (scriptForMembers != null &&!scriptForMembers.isEmpty()) {
                 sd.execSQL(scriptForMembers);
             }
 
             String scriptForGroups = scriptForGroups();
-            if (!scriptForGroups.isEmpty()) {
+            if (scriptForGroups != null &&!scriptForGroups.isEmpty()) {
                 sd.execSQL(scriptForGroups);
             }
 
             String scriptForMembersGroups = scriptForMembersGroups();
-            if (!scriptForMembersGroups.isEmpty()) {
+            if (scriptForMembersGroups != null && !scriptForMembersGroups.isEmpty()) {
                 sd.execSQL(scriptForMembersGroups);
             }
 
             String scriptForWorshipsMembers = scriptForWorshipsMembers();
-            if (!scriptForWorshipsMembers.isEmpty()) {
+            if (scriptForWorshipsMembers != null && !scriptForWorshipsMembers.isEmpty()) {
                 sd.execSQL(scriptForWorshipsMembers);
             }
 
@@ -114,8 +114,6 @@ public class Recovery {
 
     public  void LoadFromFiles() throws IOException, ClassNotFoundException {
         File file = new File(SERIALIZE_RECOVERY_FILE);
-        if (file == null)
-            return;
         FileInputStream fis = new FileInputStream(SERIALIZE_RECOVERY_FILE);
         ObjectInputStream oin = new ObjectInputStream(fis);
         Recovery rec = (Recovery) oin.readObject();

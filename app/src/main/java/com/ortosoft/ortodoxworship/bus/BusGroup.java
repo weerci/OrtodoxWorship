@@ -1,18 +1,18 @@
 package com.ortosoft.ortodoxworship.bus;
 
+import android.support.v4.util.LongSparseArray;
+
 import com.ortosoft.ortodoxworship.Model.Group;
 import com.ortosoft.ortodoxworship.Model.Member;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by dima on 24.05.2016.
  */
 public class BusGroup  {
 
-    private HashMap<Long, Member> _memberList = new HashMap<>();
-    public HashMap<Long, Member> get_memberList() {
+    private LongSparseArray<Member> _memberList = new LongSparseArray<>();
+    public LongSparseArray<Member> get_memberList() {
         return _memberList;
     }
 
@@ -26,20 +26,14 @@ public class BusGroup  {
     }
 
     // region Для публикатора
-    public void EventAddGroup(Group group) {
-        for (Member m: _memberList.values()) {
-            m.OnAddedGroup(group);
-        }
-    }
     public void EventUpdateGroup(Group group) {
-        for (Member m: _memberList.values()) {
-            m.OnUpdatedGroup(group);
+        for (int i = 0; i < _memberList.size(); i++) {
+            _memberList.valueAt(i).OnUpdatedGroup(group);
         }
-
     }
     public void EventDeleteGroup(Group group) {
-        for (Member m: _memberList.values()) {
-            m.OnDeleteGroup(group);
+        for (int i = 0; i < _memberList.size(); i++) {
+            _memberList.valueAt(i).OnDeleteGroup(group);
         }
     }
     // endregion
